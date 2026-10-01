@@ -30,10 +30,6 @@
   margin: 0 auto;
 }
 
-.about-page .site-header {
-  position: absolute;
-}
-
 .about-page .site-navigation a.active {
   opacity: 1;
 }
