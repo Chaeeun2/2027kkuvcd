@@ -1,0 +1,229 @@
+.works-page {
+  --works-content-width: 1280px;
+  --works-grid-column-gap: 26px;
+  --works-grid-row-gap: 40px;
+  --works-filter-muted: rgba(255, 255, 255, 0.35);
+  --works-thumbnail-placeholder: #d9d9d9;
+  width: 100%;
+  min-width: 1440px;
+  overflow-x: clip;
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.works-content {
+  width: var(--works-content-width);
+  min-height: 1801px;
+  margin: 0 auto;
+  padding: 214px 0 200px;
+}
+
+.works-filters {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 130px;
+}
+
+.works-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+.works-filter-group button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--works-filter-muted);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+
+.works-filter-group button:hover,
+.works-filter-group button:focus-visible,
+.works-filter-group button.is-active {
+  color: var(--color-text);
+}
+
+.works-filter-group button:focus-visible {
+  outline: 1px solid var(--color-text);
+  outline-offset: 4px;
+}
+
+.works-world-filter {
+  display: flex;
+  width: 596px;
+  height: 32px;
+  align-items: center;
+  padding: 5px 12px;
+  background: var(--color-brand);
+}
+
+.works-world-filter .works-filter-group button {
+  font-family: var(--font-korean);
+  font-weight: 900;
+  line-height: 22px;
+}
+
+.works-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--works-grid-row-gap) var(--works-grid-column-gap);
+}
+
+.works-selected-world h1 {
+  margin: 0 0 32px;
+  font-family: var(--font-korean);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.works-selected-world__layout {
+  display: grid;
+  grid-template-columns: 278px minmax(0, 1fr);
+  align-items: start;
+  gap: 48px;
+}
+
+.works-world-description {
+  position: sticky;
+  top: 40px;
+  width: 278px;
+  font-family: var(--font-korean);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.works-world-description p {
+  margin: 0;
+}
+
+.works-world-description p + p {
+  margin-top: 24px;
+}
+
+.works-grid--three-columns {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 56px;
+}
+
+.work-card {
+  min-width: 0;
+  cursor: pointer;
+}
+
+.work-card__thumbnail {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: var(--works-thumbnail-placeholder);
+}
+
+.work-card__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-card:hover .work-card__image {
+  transform: scale(1.04);
+}
+
+.work-card__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 16px;
+  font-family: var(--font-korean);
+}
+
+.work-card__copy h2,
+.work-card__copy p {
+  margin: 0;
+  line-height: 1;
+}
+
+.work-card__copy h2 {
+  overflow: hidden;
+  font-size: 20px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.work-card__copy p {
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.works-empty {
+  margin: 0;
+  color: var(--works-filter-muted);
+  font-family: var(--font-korean);
+  font-size: 18px;
+}
+
+.works-page .site-footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 100%;
+  height: 160px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 72px 80px 40px;
+  background: var(--color-footer-overlay);
+}
+
+.works-page .site-footer p {
+  margin: 0;
+  font-family: var(--font-accent);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.works-page .site-footer img {
+  width: 106.5px;
+  height: 48px;
+  object-fit: cover;
+}
+
+.works-page [data-work-reveal] {
+  opacity: 0;
+  transform: translateY(36px);
+  transition:
+    opacity 1000ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.works-page [data-work-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .works-page [data-work-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .work-card__image {
+    transition: none;
+  }
+}
