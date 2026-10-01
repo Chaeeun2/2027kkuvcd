@@ -9,6 +9,7 @@ import {
   workCategories,
   workWorlds,
 } from "../data/works";
+import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
 import "../works.css";
 import "../work-detail.css";
 
@@ -31,11 +32,19 @@ function WorkDetailPage() {
     if (!page) return undefined;
 
     const elements = [...page.querySelectorAll("[data-work-detail-reveal]")];
+    const timers = new Set();
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-visible");
+
+          const loadingDelay = getLoadingRevealDelay();
+          const timer = window.setTimeout(() => {
+            entry.target.classList.add("is-visible");
+            timers.delete(timer);
+          }, loadingDelay);
+
+          timers.add(timer);
           observer.unobserve(entry.target);
         });
       },
@@ -43,7 +52,10 @@ function WorkDetailPage() {
     );
 
     elements.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
   }, [workId]);
 
   if (!work) return <Navigate to="/works" replace />;

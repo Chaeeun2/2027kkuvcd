@@ -19,6 +19,7 @@ import support1 from "../assets/about-section5-img1.png";
 import support2 from "../assets/about-section5-img2.png";
 import support3 from "../assets/about-section5-img3.png";
 import lineImage from "../assets/line.png";
+import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
 import "../about.css";
 
 const introBackgrounds = [introBg1, introBg2, introBg3, introBg4];
@@ -53,7 +54,7 @@ function useScrollReveal() {
     });
 
     const revealElement = (element) => {
-      const loadingDelay = document.querySelector(".loading-screen") ? 900 : 0;
+      const loadingDelay = getLoadingRevealDelay();
       const timer = window.setTimeout(() => {
         element.classList.add("is-visible");
         pendingTimers.delete(timer);

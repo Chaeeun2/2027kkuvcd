@@ -3,6 +3,7 @@ import DesignerCard from "../components/DesignerCard";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { designers } from "../data/designers";
+import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
 import "../designers.css";
 
 function DesignersPage() {
@@ -12,46 +13,33 @@ function DesignersPage() {
     const cards = [
       ...pageRef.current.querySelectorAll("[data-designer-card]"),
     ];
-    let cardObserver;
-    let loadingObserver;
+    const pendingTimers = new Set();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
 
-    const startCardReveal = () => {
-      if (cardObserver) return;
-
-      cardObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
+          const loadingDelay = getLoadingRevealDelay();
+          const timer = window.setTimeout(() => {
             entry.target.classList.add("is-visible");
-            cardObserver.unobserve(entry.target);
-          });
-        },
-        {
-          threshold: 0.08,
-          rootMargin: "0px 0px -5% 0px",
-        },
-      );
+            pendingTimers.delete(timer);
+          }, loadingDelay);
 
-      cards.forEach((card) => cardObserver.observe(card));
-    };
+          pendingTimers.add(timer);
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.08,
+        rootMargin: "0px 0px -5% 0px",
+      },
+    );
 
-    if (document.querySelector(".loading-screen")) {
-      loadingObserver = new MutationObserver(() => {
-        if (document.querySelector(".loading-screen")) return;
-        loadingObserver.disconnect();
-        window.requestAnimationFrame(startCardReveal);
-      });
-      loadingObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
-    } else {
-      startCardReveal();
-    }
+    cards.forEach((card) => observer.observe(card));
 
     return () => {
-      cardObserver?.disconnect();
-      loadingObserver?.disconnect();
+      observer.disconnect();
+      pendingTimers.forEach((timer) => window.clearTimeout(timer));
     };
   }, []);
 

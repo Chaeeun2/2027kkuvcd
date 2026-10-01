@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import WorkCard from "../components/WorkCard";
 import WorksFilters from "../components/WorksFilters";
 import { workCategories, works, workWorlds } from "../data/works";
+import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
 import "../works.css";
 
 function WorkGrid({ items, threeColumns = false }) {
@@ -66,9 +67,7 @@ function WorksPage() {
           if (!entry.isIntersecting) return;
 
           const delay = Number(entry.target.dataset.revealDelay ?? 0);
-          const loadingDelay = document.querySelector(".loading-screen")
-            ? 900
-            : 0;
+          const loadingDelay = getLoadingRevealDelay();
           const timer = window.setTimeout(() => {
             entry.target.classList.add("is-visible");
             timers.delete(timer);

@@ -6,6 +6,7 @@ import designerLine from "../assets/designer-line.png";
 import projectArrow from "../assets/designer-work-arrow.png";
 import { getDesignerById } from "../data/designers";
 import { getWorksByDesignerId } from "../data/designerWorks";
+import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
 import "../designer-detail.css";
 
 const emptyProjects = Array.from({ length: 3 }, (_, index) => ({
@@ -34,9 +35,7 @@ function useDetailReveal() {
           if (!entry.isIntersecting) return;
 
           const delay = Number(entry.target.dataset.revealDelay ?? 0);
-          const loadingDelay = document.querySelector(".loading-screen")
-            ? 900
-            : 0;
+          const loadingDelay = getLoadingRevealDelay();
           const timer = window.setTimeout(() => {
             entry.target.classList.add("is-visible");
             timers.delete(timer);
