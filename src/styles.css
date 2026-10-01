@@ -230,7 +230,7 @@ a {
   background: var(--color-brand);
   transform: scaleX(0);
   transform-origin: left center;
-  animation: loading-progress 1s linear forwards;
+  animation: loading-progress var(--loading-duration, 1s) linear forwards;
 }
 
 @keyframes loading-progress {

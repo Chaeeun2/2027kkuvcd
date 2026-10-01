@@ -9,6 +9,7 @@ import WorkDetailPage from "./pages/WorkDetailPage";
 import WorksPage from "./pages/WorksPage";
 
 const LOADING_DURATION = 1000;
+const INTRO_LOADING_DURATION = 4000;
 const LOADING_FADE_TIME = 1000;
 
 function ScrollToTop() {
@@ -21,26 +22,31 @@ function ScrollToTop() {
   return null;
 }
 
-function RouteLoadingScreen() {
+function RouteLoadingScreen({ duration }) {
   const [loadingPhase, setLoadingPhase] = useState("visible");
 
   useEffect(() => {
     const leavingTimer = window.setTimeout(() => {
       setLoadingPhase("leaving");
-    }, LOADING_DURATION);
+    }, duration);
     const hiddenTimer = window.setTimeout(() => {
       setLoadingPhase("hidden");
-    }, LOADING_DURATION + LOADING_FADE_TIME);
+    }, duration + LOADING_FADE_TIME);
 
     return () => {
       window.clearTimeout(leavingTimer);
       window.clearTimeout(hiddenTimer);
     };
-  }, []);
+  }, [duration]);
 
   if (loadingPhase === "hidden") return null;
 
-  return <LoadingScreen isLeaving={loadingPhase === "leaving"} />;
+  return (
+    <LoadingScreen
+      duration={duration}
+      isLeaving={loadingPhase === "leaving"}
+    />
+  );
 }
 
 function App() {
@@ -71,7 +77,14 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
-      {!skipLoading && <RouteLoadingScreen key={pathname} />}
+      {!skipLoading && (
+        <RouteLoadingScreen
+          duration={
+            pathname === "/" ? INTRO_LOADING_DURATION : LOADING_DURATION
+          }
+          key={pathname}
+        />
+      )}
     </>
   );
 }
