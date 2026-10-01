@@ -191,12 +191,22 @@ a {
   place-items: center;
   background: var(--color-background);
   opacity: 1;
-  transition: opacity 1s ease;
 }
 
 .loading-screen.is-leaving {
-  opacity: 0;
+  animation: loading-screen-fade-out
+    var(--loading-fade-duration, 1.5s) ease forwards;
   pointer-events: none;
+}
+
+@keyframes loading-screen-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
 }
 
 .loading-content {

@@ -12,23 +12,47 @@ function DesignersPage() {
     const cards = [
       ...pageRef.current.querySelectorAll("[data-designer-card]"),
     ];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        });
-      },
-      {
-        threshold: 0.08,
-        rootMargin: "0px 0px -5% 0px",
-      },
-    );
+    let cardObserver;
+    let loadingObserver;
 
-    cards.forEach((card) => observer.observe(card));
+    const startCardReveal = () => {
+      if (cardObserver) return;
 
-    return () => observer.disconnect();
+      cardObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            cardObserver.unobserve(entry.target);
+          });
+        },
+        {
+          threshold: 0.08,
+          rootMargin: "0px 0px -5% 0px",
+        },
+      );
+
+      cards.forEach((card) => cardObserver.observe(card));
+    };
+
+    if (document.querySelector(".loading-screen")) {
+      loadingObserver = new MutationObserver(() => {
+        if (document.querySelector(".loading-screen")) return;
+        loadingObserver.disconnect();
+        window.requestAnimationFrame(startCardReveal);
+      });
+      loadingObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    } else {
+      startCardReveal();
+    }
+
+    return () => {
+      cardObserver?.disconnect();
+      loadingObserver?.disconnect();
+    };
   }, []);
 
   return (

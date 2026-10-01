@@ -9,8 +9,8 @@ import WorkDetailPage from "./pages/WorkDetailPage";
 import WorksPage from "./pages/WorksPage";
 
 const LOADING_DURATION = 1000;
-const INTRO_LOADING_DURATION = 4000;
-const LOADING_FADE_TIME = 1000;
+const INTRO_LOADING_DURATION = 2000;
+const LOADING_FADE_TIME = 1500;
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -29,14 +29,8 @@ function RouteLoadingScreen({ duration }) {
     const leavingTimer = window.setTimeout(() => {
       setLoadingPhase("leaving");
     }, duration);
-    const hiddenTimer = window.setTimeout(() => {
-      setLoadingPhase("hidden");
-    }, duration + LOADING_FADE_TIME);
 
-    return () => {
-      window.clearTimeout(leavingTimer);
-      window.clearTimeout(hiddenTimer);
-    };
+    return () => window.clearTimeout(leavingTimer);
   }, [duration]);
 
   if (loadingPhase === "hidden") return null;
@@ -44,7 +38,9 @@ function RouteLoadingScreen({ duration }) {
   return (
     <LoadingScreen
       duration={duration}
+      fadeDuration={LOADING_FADE_TIME}
       isLeaving={loadingPhase === "leaving"}
+      onFadeComplete={() => setLoadingPhase("hidden")}
     />
   );
 }
