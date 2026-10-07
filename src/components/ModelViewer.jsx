@@ -9,6 +9,11 @@ const DESIGN_WIDTH = 1440;
 const DESIGN_HEIGHT = 900;
 const MODEL_RADIUS = 1.8;
 const FIT_MARGIN = 1.23;
+const MOBILE_BREAKPOINT = 768;
+// 모바일 시안은 상자가 화면 폭보다 조금 넓게 잘려 나간다.
+const MOBILE_FIT_MARGIN = 1.18;
+// 시안의 상자는 화면 중앙보다 조금 아래에 놓인다.
+const MOBILE_LOOK_AT_Y = 0.33;
 
 const LIGHTING = {
   exposure: 1.5,
@@ -42,13 +47,23 @@ function CameraSetup() {
     const designDistance =
       (MODEL_RADIUS / Math.tan(verticalFov / 2)) * FIT_MARGIN;
 
-    // 모델의 화면상 크기를 1440x900 기준 대비 뷰포트 비율만큼 키우거나 줄인다.
-    const viewportScale = Math.min(
-      size.width / DESIGN_WIDTH,
-      size.height / DESIGN_HEIGHT,
-    );
-    const distance =
-      (designDistance * (size.height / DESIGN_HEIGHT)) / viewportScale;
+    const isMobile = size.width < MOBILE_BREAKPOINT;
+    let distance;
+
+    if (isMobile) {
+      // 세로 화면에서는 높이가 아니라 폭에 맞춰야 상자가 시안만큼 커진다.
+      const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
+      distance =
+        (MODEL_RADIUS / Math.tan(horizontalFov / 2)) * MOBILE_FIT_MARGIN;
+    } else {
+      // 모델의 화면상 크기를 1440x900 기준 대비 뷰포트 비율만큼 키우거나 줄인다.
+      const viewportScale = Math.min(
+        size.width / DESIGN_WIDTH,
+        size.height / DESIGN_HEIGHT,
+      );
+      distance =
+        (designDistance * (size.height / DESIGN_HEIGHT)) / viewportScale;
+    }
 
     camera.aspect = aspect;
     camera.position.copy(
@@ -56,7 +71,7 @@ function CameraSetup() {
     );
     camera.near = 0.1;
     camera.far = 100;
-    camera.lookAt(0, 0, 0);
+    camera.lookAt(0, isMobile ? MOBILE_LOOK_AT_Y : 0, 0);
     camera.updateProjectionMatrix();
   }, [camera, size.height, size.width]);
 

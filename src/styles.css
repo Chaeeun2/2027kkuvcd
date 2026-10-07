@@ -33,11 +33,14 @@
   --page-content-width: 1280px;
   --header-height: 134px;
   --header-padding-top: 40px;
+  --header-padding-bottom: 40px;
   --header-logo-width: 120px;
   --header-logo-height: 54px;
   --footer-height: 160px;
   --footer-logo-width: 106.5px;
   --footer-logo-height: 48px;
+  --loading-logo-width: 160px;
+  --loading-logo-height: 72.5px;
 
   /*
    * 타이포 스케일. PC에서는 값이 겹치는 항목이 많지만 모바일에서 서로 다른
@@ -110,9 +113,10 @@ a {
   display: flex;
   width: 100%;
   height: var(--header-height);
-  align-items: flex-end;
+  align-items: var(--header-align, flex-end);
   justify-content: space-between;
-  padding: var(--header-padding-top) var(--page-gutter);
+  padding: var(--header-padding-top) var(--page-gutter)
+    var(--header-padding-bottom);
   transform: translateY(0);
   transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
@@ -156,6 +160,13 @@ a {
 .site-navigation a:hover,
 .site-navigation a:focus-visible {
   opacity: 0.68;
+}
+
+/* 햄버거 버튼과 닫기 버튼, 드로어 바깥 영역은 모바일에서만 쓴다. */
+.site-menu-toggle,
+.site-menu-close,
+.site-menu-backdrop {
+  display: none;
 }
 
 .hero {
@@ -259,8 +270,8 @@ a {
 
 .loading-logo {
   display: block;
-  width: 160px;
-  height: 72.5px;
+  width: var(--loading-logo-width);
+  height: var(--loading-logo-height);
   object-fit: cover;
 }
 
@@ -302,10 +313,16 @@ a {
     --page-min-height: 0;
     --page-gutter: 16px;
     --page-content-width: 100%;
+
+    /* 로고와 햄버거의 윗변을 시안대로 화면 상단에서 95px에 맞춘다. */
     --header-height: 127.5px;
-    --header-padding-top: 0px;
+    --header-padding-top: 95px;
+    --header-padding-bottom: 0px;
+    --header-align: flex-start;
     --header-logo-width: 72px;
     --header-logo-height: 32.5px;
+    --loading-logo-width: 136.5px;
+    --loading-logo-height: 73px;
 
     --font-size-hero-title: 28px;
     --font-size-hero-hint: 16px;
@@ -338,5 +355,123 @@ a {
   .works-page .site-footer,
   .work-detail-page .site-footer {
     display: none;
+  }
+
+  .site-menu-toggle {
+    display: flex;
+    width: 23.5px;
+    height: 17px;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-brand);
+    cursor: pointer;
+  }
+
+  .site-menu-toggle span {
+    display: block;
+    height: 2px;
+    background: currentColor;
+  }
+
+  /*
+   * 헤더가 transform을 쓰고 있어 이 안의 fixed 요소는 헤더 박스를 기준으로
+   * 잡힌다. 그래서 inset 대신 vw/dvh로 화면 전체를 덮는다.
+   */
+  .site-menu-backdrop {
+    position: fixed;
+    z-index: 4;
+    top: 0;
+    right: 0;
+    display: block;
+    width: 100vw;
+    height: 100dvh;
+    background: transparent;
+  }
+
+  .site-navigation {
+    position: fixed;
+    z-index: 5;
+    top: 0;
+    right: 0;
+    width: 213px;
+    height: 100dvh;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    padding: 154.5px var(--page-gutter) 0;
+    background: #ffffff;
+    visibility: hidden;
+    transform: translateX(100%);
+    transition:
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 320ms;
+  }
+
+  .site-navigation.is-open {
+    visibility: visible;
+    transform: translateX(0);
+    transition:
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s;
+  }
+
+  .site-navigation a {
+    padding-bottom: 18px;
+    border-bottom: 2px solid currentColor;
+    line-height: 1.5;
+  }
+
+  .site-navigation a:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .site-menu-close {
+    position: absolute;
+    top: 95px;
+    right: var(--page-gutter);
+    display: block;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .site-menu-close::before,
+  .site-menu-close::after {
+    content: "";
+    position: absolute;
+    top: calc(50% - 1.17px);
+    left: calc(50% - 12.73px);
+    width: 25.46px;
+    height: 2.34px;
+    background: currentColor;
+  }
+
+  .site-menu-close::before {
+    transform: rotate(45deg);
+  }
+
+  .site-menu-close::after {
+    transform: rotate(-45deg);
+  }
+
+  /* 모바일 시안의 제목은 PC와 달리 가로로 늘리지 않는다. */
+  .hero-title {
+    top: 33%;
+    width: max-content;
+    height: auto;
+    line-height: 1.5;
+    transform: translateX(-50%);
+  }
+
+  .interaction-hint {
+    bottom: 15.8%;
   }
 }
