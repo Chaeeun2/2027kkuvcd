@@ -4,8 +4,13 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import designerLine from "../assets/designer-line.png";
 import projectArrow from "../assets/designer-work-arrow.png";
-import { getDesignerById } from "../data/designers";
+import {
+  formatEnglishName,
+  getDesignerById,
+  getDesignerDetail,
+} from "../data/designers";
 import { getWorksByDesignerId } from "../data/designerWorks";
+import useIsMobile from "../hooks/useIsMobile";
 import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
 import "../designer-detail.css";
 
@@ -61,13 +66,13 @@ function useDetailReveal() {
 
 function DesignerDetailPage() {
   const pageRef = useDetailReveal();
+  const isMobile = useIsMobile();
   const { designerId } = useParams();
   const designer = getDesignerById(designerId);
 
   if (!designer) return <Navigate to="/designers" replace />;
 
-  const defaultDetail = getDesignerById("designer-26").detail;
-  const detail = designer.detail ?? defaultDetail;
+  const detail = getDesignerDetail(designer);
   const assignedWorks = getWorksByDesignerId(designer.id);
   const projects = assignedWorks.length
     ? assignedWorks.map((work) => ({
@@ -78,9 +83,9 @@ function DesignerDetailPage() {
       }))
     : emptyProjects;
   const displayKoreanName = designer.koreanName;
-  const displayEnglishName = designer.englishName
-    .toLowerCase()
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const displayEnglishName = formatEnglishName(designer.englishName);
+  // 모바일 시안은 세로 프로필 사진 대신 가로 아이디카드를 머리에 둔다.
+  const headerImage = isMobile ? designer.frontImage : detail.profileImage;
 
   return (
     <main className="designer-detail-page" ref={pageRef}>
@@ -98,11 +103,8 @@ function DesignerDetailPage() {
             data-detail-reveal
             data-reveal-delay="80"
           >
-            {detail.profileImage ? (
-              <img
-                src={detail.profileImage}
-                alt={`${displayKoreanName} 프로필`}
-              />
+            {headerImage ? (
+              <img src={headerImage} alt={`${displayKoreanName} 프로필`} />
             ) : (
               <span>PROFILE IMAGE</span>
             )}

@@ -272,6 +272,85 @@
   transform: translateY(0);
 }
 
+@media (max-width: 767px) {
+  .designer-detail-content {
+    min-height: 0;
+    padding: 168px 0 80px;
+  }
+
+  /* 제목 줄 높이를 글자 높이에 맞춰 두어야 상단 여백이 시안과 맞는다. */
+  .designer-detail-heading {
+    height: 14px;
+    gap: 8px;
+    margin-bottom: 39px;
+  }
+
+  .designer-detail-heading h1 {
+    line-height: 14px;
+  }
+
+  .designer-detail-heading img {
+    width: 126px;
+    height: 14px;
+  }
+
+  .designer-detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  /* 가로 아이디카드 비율. PC의 세로 프로필 사진 자리를 그대로 쓴다. */
+  .designer-detail-profile-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 410 / 257;
+  }
+
+  .designer-detail-section-title {
+    height: 27px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    line-height: 23px;
+  }
+
+  .designer-detail-profile-body {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    margin: 20px 0 33px;
+  }
+
+  /* 모바일 시안에는 서명이 없다. */
+  .designer-detail-signature {
+    display: none;
+  }
+
+  .designer-detail-name {
+    gap: 16px;
+  }
+
+  .designer-detail-contacts {
+    gap: 2.4px;
+    margin-top: 30px;
+    font-size: var(--font-size-body);
+  }
+
+  .designer-detail-contacts div {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .designer-detail-statement p {
+    min-height: 0;
+    padding: 18px 0 0;
+  }
+
+  .designer-detail-project-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    padding-top: 24px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .designer-detail-page [data-detail-reveal] {
     opacity: 1;

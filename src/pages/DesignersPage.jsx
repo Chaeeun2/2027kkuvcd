@@ -3,11 +3,13 @@ import DesignerCard from "../components/DesignerCard";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { designers } from "../data/designers";
+import useIsMobile from "../hooks/useIsMobile";
 import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
 import "../designers.css";
 
 function DesignersPage() {
   const pageRef = useRef(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const cards = [
@@ -54,6 +56,7 @@ function DesignersPage() {
             <DesignerCard
               designer={designer}
               index={index}
+              isMobile={isMobile}
               key={designer.id}
             />
           ))}

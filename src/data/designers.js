@@ -63,3 +63,15 @@ export const designers = [
 export function getDesignerById(id) {
   return designers.find((designer) => designer.id === id);
 }
+
+// 아직 개인 정보가 없는 디자이너는 샘플 한 명의 내용을 그대로 보여 준다.
+const sampleDetail = getDesignerById("designer-26").detail;
+
+export function getDesignerDetail(designer) {
+  return designer.detail ?? sampleDetail;
+}
+
+// 데이터는 "SEUNGMIN LEE" 처럼 전부 대문자라 표시용으로만 다듬는다.
+export function formatEnglishName(englishName) {
+  return englishName.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+}

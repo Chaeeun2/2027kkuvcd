@@ -171,6 +171,69 @@
   }
 }
 
+@media (max-width: 767px) {
+  /*
+   * 시안에는 페이지 제목이 없고, 아직 붙이지 않은 검색 필드 자리만큼 빈 띠가
+   * 생기지 않도록 첫 행을 다른 페이지와 같은 168px에서 시작한다.
+   */
+  .designers-content {
+    padding: 168px 0 80px;
+  }
+
+  .designers-content h1 {
+    display: none;
+  }
+
+  .designers-grid {
+    gap: 33px 15.33px;
+  }
+
+  /* 세로 사진과 이름을 함께 담는 통이라 카드 자체의 비율은 풀어 준다. */
+  .designer-card--portrait {
+    aspect-ratio: auto;
+    border-radius: 0;
+    perspective: none;
+  }
+
+  .designer-card__photo {
+    display: grid;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 6px;
+    place-items: center;
+    background: #242424;
+    color: #777777;
+    font-family: var(--font-display);
+    font-size: 10px;
+  }
+
+  .designer-card__photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .designer-card--portrait .designer-card__korean-name {
+    margin-top: 13px;
+    color: var(--color-text);
+    font-size: var(--font-size-body);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .designer-card--portrait .designer-card__english-name {
+    margin-top: 7.5px;
+    color: var(--color-text);
+    font-family: var(--font-korean);
+    font-size: var(--font-size-card-caption);
+    font-weight: 400;
+    line-height: 1;
+    text-transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .designer-card {
     opacity: 1;
