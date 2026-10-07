@@ -121,7 +121,8 @@ a {
 
 .hero {
   position: relative;
-  width: 100vw;
+  width: 100%;
+  min-width: 1440px;
   height: 100dvh;
   min-height: 900px;
 }
@@ -166,7 +167,7 @@ a {
 .interaction-hint {
   position: absolute;
   z-index: 3;
-  top: 725px;
+  bottom: 100px;
   left: 50%;
   margin: 0;
   color: var(--color-text);

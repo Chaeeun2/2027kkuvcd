@@ -1,12 +1,14 @@
 import { Suspense, useEffect } from "react";
 import { Canvas, useLoader, useThree } from "@react-three/fiber";
-import {
-  OrbitControls,
-  PresentationControls,
-} from "@react-three/drei";
+import { PresentationControls } from "@react-three/drei";
 import { MathUtils, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import defaultModelUrl from "../assets/helloworld_Box_Web exact.glb?url";
+
+const DESIGN_WIDTH = 1440;
+const DESIGN_HEIGHT = 900;
+const MODEL_RADIUS = 1.8;
+const FIT_MARGIN = 1.23;
 
 const LIGHTING = {
   exposure: 1.5,
@@ -37,14 +39,16 @@ function CameraSetup() {
   useEffect(() => {
     const aspect = size.width / size.height;
     const verticalFov = MathUtils.degToRad(camera.fov);
-    const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
-    const modelRadius = 1.8;
-    const margin = 1.23;
+    const designDistance =
+      (MODEL_RADIUS / Math.tan(verticalFov / 2)) * FIT_MARGIN;
+
+    // 모델의 화면상 크기를 1440x900 기준 대비 뷰포트 비율만큼 키우거나 줄인다.
+    const viewportScale = Math.min(
+      size.width / DESIGN_WIDTH,
+      size.height / DESIGN_HEIGHT,
+    );
     const distance =
-      Math.max(
-        modelRadius / Math.tan(verticalFov / 2),
-        modelRadius / Math.tan(horizontalFov / 2),
-      ) * margin;
+      (designDistance * (size.height / DESIGN_HEIGHT)) / viewportScale;
 
     camera.aspect = aspect;
     camera.position.copy(
@@ -122,18 +126,6 @@ function ModelViewer() {
       <Suspense fallback={null}>
         <Model />
       </Suspense>
-
-      <OrbitControls
-        makeDefault
-        enableRotate={false}
-        enablePan={false}
-        enableZoom
-        minDistance={3.5}
-        maxDistance={12}
-        zoomSpeed={0.7}
-        dampingFactor={0.08}
-        enableDamping
-      />
     </Canvas>
   );
 }

@@ -143,8 +143,8 @@ function IntroBackground() {
       setActiveIndex(1);
       intervalId = window.setInterval(() => {
         setActiveIndex((index) => (index + 1) % introBackgrounds.length);
-      }, 7000);
-    }, 5000);
+      }, 3000);
+    }, 3000);
 
     return () => {
       window.clearTimeout(firstChangeId);

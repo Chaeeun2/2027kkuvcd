@@ -17,8 +17,10 @@ function DesignerCard({ designer, index }) {
           className={`designer-card__face designer-card__front designer-card__front--${colorScheme}`}
         >
           <img src={frontImage} alt="" />
-          <p className="designer-card__korean-name">{koreanName}</p>
-          <p className="designer-card__english-name">{englishName}</p>
+          <div className="designer-card__front-body">
+            <p className="designer-card__korean-name">{koreanName}</p>
+            <p className="designer-card__english-name">{englishName}</p>
+          </div>
         </div>
 
         <div

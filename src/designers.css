@@ -30,6 +30,7 @@
 }
 
 .designer-card {
+  position: relative;
   display: block;
   container-type: inline-size;
   width: 100%;
@@ -52,9 +53,8 @@
 }
 
 .designer-card__inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   transform-style: preserve-3d;
   transition: transform 760ms cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform;
@@ -63,6 +63,7 @@
 .designer-card__face {
   position: absolute;
   inset: 0;
+  display: grid;
   overflow: hidden;
   border-radius: inherit;
   backface-visibility: hidden;
@@ -70,8 +71,7 @@
 }
 
 .designer-card__face > img {
-  position: absolute;
-  inset: 0;
+  grid-area: 1 / 1;
   display: block;
   width: 100%;
   height: 100%;
@@ -79,7 +79,14 @@
   pointer-events: none;
 }
 
-.designer-card__front {
+/*
+ * 이미지와 같은 그리드 칸에 겹쳐 둔다. 절대 위치로 띄우면 사파리가 이 레이어를
+ * 따로 합성해서 카드가 뒤집히는 중에 뒷면 위로 글자가 비쳐 보인다.
+ * 패딩도 반드시 이 레이어에만 둔다. 패딩이 있는 조상 안에서는 사파리가
+ * 이미지의 height: 100%를 패딩 박스가 아닌 콘텐츠 박스 기준으로 계산한다.
+ */
+.designer-card__front-body {
+  grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -96,8 +103,6 @@
 
 .designer-card__korean-name,
 .designer-card__english-name {
-  position: relative;
-  z-index: 1;
   margin: 0;
 }
 
@@ -110,7 +115,6 @@
 }
 
 .designer-card__english-name {
-  width: 100%;
   font-family: var(--font-accent);
   font-size: 9cqw;
   font-weight: 400;
