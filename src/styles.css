@@ -25,6 +25,44 @@
   --font-body: "OPS Favorite", sans-serif;
   --font-accent: var(--font-body);
   --font-korean: "Pretendard", sans-serif;
+
+  /* 레이아웃 기준값. 태블릿/모바일 구간에서 미디어 쿼리로 덮어쓴다. */
+  --page-min-width: 1440px;
+  --page-min-height: 900px;
+  --page-gutter: 80px;
+  --page-content-width: 1280px;
+  --header-height: 134px;
+  --header-padding-top: 40px;
+  --header-logo-width: 120px;
+  --header-logo-height: 54px;
+  --footer-height: 160px;
+  --footer-logo-width: 106.5px;
+  --footer-logo-height: 48px;
+
+  /*
+   * 타이포 스케일. PC에서는 값이 겹치는 항목이 많지만 모바일에서 서로 다른
+   * 크기로 갈라지므로(예: 본문 16px은 유지, 카드 보조문 16px은 13px로) 역할별로
+   * 따로 둔다.
+   */
+  --font-size-hero-title: 96px;
+  --font-size-hero-hint: 20px;
+  --font-size-nav: 16px;
+  --font-size-page-title: 36px;
+  --font-size-detail-title: 32px;
+  --font-size-name-ko: 32px;
+  --font-size-name-en: 32px;
+  --font-size-section-title: 24px;
+  --font-size-world-title: 24px;
+  --font-size-project-title: 24px;
+  --font-size-lead: 20px;
+  --font-size-card-title: 20px;
+  --font-size-filter: 18px;
+  --font-size-world-chip: 18px;
+  --font-size-body: 16px;
+  --font-size-card-caption: 16px;
+  --font-size-project-category: 16px;
+  --font-size-small: 14px;
+  --font-size-micro: 13px;
   background: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-body);
@@ -39,8 +77,8 @@
 html,
 body,
 #root {
-  min-width: 1440px;
-  min-height: 900px;
+  min-width: var(--page-min-width);
+  min-height: var(--page-min-height);
   margin: 0;
 }
 
@@ -57,9 +95,9 @@ a {
 .entry-page {
   position: relative;
   width: 100vw;
-  min-width: 1440px;
+  min-width: var(--page-min-width);
   height: 100dvh;
-  min-height: 900px;
+  min-height: var(--page-min-height);
   overflow: hidden;
   background: var(--color-background);
 }
@@ -71,10 +109,10 @@ a {
   left: 0;
   display: flex;
   width: 100%;
-  height: 134px;
+  height: var(--header-height);
   align-items: flex-end;
   justify-content: space-between;
-  padding: 40px 80px;
+  padding: var(--header-padding-top) var(--page-gutter);
   transform: translateY(0);
   transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
@@ -87,14 +125,15 @@ a {
 
 .site-logo {
   display: block;
-  width: 120px;
-  height: 54px;
+  width: var(--header-logo-width);
+  height: var(--header-logo-height);
+  flex-shrink: 0;
 }
 
 .site-logo img {
   display: block;
-  width: 120px;
-  height: 54px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -104,7 +143,7 @@ a {
   gap: 64px;
   color: var(--color-brand);
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: var(--font-size-nav);
   font-weight: 400;
   line-height: 1;
   white-space: nowrap;
@@ -122,9 +161,9 @@ a {
 .hero {
   position: relative;
   width: 100%;
-  min-width: 1440px;
+  min-width: var(--page-min-width);
   height: 100dvh;
-  min-height: 900px;
+  min-height: var(--page-min-height);
 }
 
 .hero-title {
@@ -137,7 +176,7 @@ a {
   margin: 0;
   color: var(--color-text);
   font-family: var(--font-display);
-  font-size: 96px;
+  font-size: var(--font-size-hero-title);
   font-weight: 400;
   line-height: 0.82;
   white-space: nowrap;
@@ -172,7 +211,7 @@ a {
   margin: 0;
   color: var(--color-text);
   font-family: var(--font-body);
-  font-size: 20px;
+  font-size: var(--font-size-hero-hint);
   font-weight: 400;
   line-height: 1.5;
   white-space: nowrap;
@@ -187,8 +226,8 @@ a {
   display: grid;
   width: 100vw;
   height: 100dvh;
-  min-width: 1440px;
-  min-height: 900px;
+  min-width: var(--page-min-width);
+  min-height: var(--page-min-height);
   place-items: center;
   background: var(--color-background);
   opacity: 1;
@@ -247,5 +286,57 @@ a {
 @keyframes loading-progress {
   to {
     transform: scaleX(1);
+  }
+}
+
+/*
+ * 반응형 구간은 세 단계다.
+ *   1440px 이상  : PC 디자인 원본 그대로.
+ *   768~1439px   : PC 레이아웃을 유지하고 폰트와 여백만 줄인다.
+ *   767px 이하   : 피그마 모바일 시안(402px 기준) 레이아웃으로 전환한다.
+ * 값은 전부 :root 토큰으로만 바꾸고, 레이아웃 구조는 각 페이지 CSS에서 다룬다.
+ */
+@media (max-width: 767px) {
+  :root {
+    --page-min-width: 0;
+    --page-min-height: 0;
+    --page-gutter: 16px;
+    --page-content-width: 100%;
+    --header-height: 127.5px;
+    --header-padding-top: 0px;
+    --header-logo-width: 72px;
+    --header-logo-height: 32.5px;
+
+    --font-size-hero-title: 28px;
+    --font-size-hero-hint: 16px;
+    --font-size-nav: 16px;
+    --font-size-page-title: 20px;
+    --font-size-detail-title: 24px;
+    --font-size-name-ko: 20px;
+    --font-size-name-en: 16px;
+    --font-size-section-title: 16px;
+    --font-size-world-title: 20px;
+    --font-size-project-title: 18px;
+    --font-size-lead: 16px;
+    --font-size-card-title: 16px;
+    --font-size-filter: 16px;
+    --font-size-world-chip: 14px;
+    --font-size-body: 16px;
+    --font-size-card-caption: 13px;
+    --font-size-project-category: 14px;
+    --font-size-small: 14px;
+    --font-size-micro: 13px;
+  }
+
+  /*
+   * 모바일 시안에는 푸터가 없다. 페이지별 규칙이 .about-page .site-footer 처럼
+   * 선택자 두 개로 선언되어 있어 같은 특이도로 맞춰 준다.
+   */
+  .about-page .site-footer,
+  .designers-page .site-footer,
+  .designer-detail-page .site-footer,
+  .works-page .site-footer,
+  .work-detail-page .site-footer {
+    display: none;
   }
 }

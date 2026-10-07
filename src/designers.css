@@ -1,14 +1,14 @@
 .designers-page {
   position: relative;
   width: 100%;
-  min-width: 1440px;
+  min-width: var(--page-min-width);
   overflow: hidden;
   background: var(--color-background);
   color: var(--color-text);
 }
 
 .designers-content {
-  width: 1280px;
+  width: min(var(--page-content-width), 100% - var(--page-gutter) * 2);
   margin: 0 auto;
   padding: 214px 0 213px;
 }
@@ -17,7 +17,7 @@
   height: 25px;
   margin: 0 0 48px;
   font-family: var(--font-display);
-  font-size: 36px;
+  font-size: var(--font-size-page-title);
   font-weight: 400;
   line-height: 25px;
 }
@@ -140,29 +140,34 @@
   z-index: 2;
   display: flex;
   width: 100%;
-  height: 160px;
+  height: var(--footer-height);
   align-items: flex-start;
   justify-content: space-between;
-  padding: 72px 80px 40px;
+  padding: 72px var(--page-gutter) 40px;
   background: var(--color-footer-overlay);
 }
 
 .designers-page .site-footer p {
   margin: 0;
   font-family: var(--font-accent);
-  font-size: 16px;
+  font-size: var(--font-size-body);
   line-height: 1.5;
 }
 
 .designers-page .site-footer img {
-  width: 106.5px;
-  height: 48px;
+  width: var(--footer-logo-width);
+  height: var(--footer-logo-height);
   object-fit: cover;
 }
 
 @media (hover: hover) and (pointer: fine) {
+  /*
+   * 0.3초 이상 머물렀을 때만 뒤집는다. 그 전에 커서가 빠져나가면 지연 중이던
+   * 전환이 취소되므로 카드는 움직이지 않는다. 되돌아올 때는 지연이 없다.
+   */
   .designer-card:hover .designer-card__inner {
     transform: rotateY(180deg);
+    transition-delay: 300ms;
   }
 }
 
@@ -173,7 +178,8 @@
     transition: none;
   }
 
+  /* 모션은 없애되 머무는 시간 조건은 유지한다. */
   .designer-card__inner {
-    transition: none;
+    transition: transform 0ms;
   }
 }
