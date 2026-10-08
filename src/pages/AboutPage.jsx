@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import LanguageToggle from "../components/LanguageToggle";
+import useIsMobile from "../hooks/useIsMobile";
 import aboutBg from "../assets/about_bg.jpg";
 import introBg1 from "../assets/about-section1-bg01.jpg";
 import introBg2 from "../assets/about-section1-bg02.jpg";
@@ -19,11 +21,72 @@ import support1 from "../assets/about-section5-img1.png";
 import support2 from "../assets/about-section5-img2.png";
 import support3 from "../assets/about-section5-img3.png";
 import lineImage from "../assets/line.png";
-import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
+import { scheduleReveal } from "../utils/loadingReveal";
 import "../about.css";
 
 const introBackgrounds = [introBg1, introBg2, introBg3, introBg4];
 const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5];
+
+const aboutCopy = {
+  ko: {
+    subtitle: (
+      <>
+        2027 건국대학교 디자인대학교
+        <br />
+        시각영상디자인학과 시각트랙
+        <br />
+        졸업전시회
+      </>
+    ),
+    body: "이번 졸업 전시 ‘HELLO WORLD’는 지난 4년간 우리가 치열하게 고민하며 쌓아온 시간과 경험이 학교라는 훈련장을 떠나 비로소 사회라는 수취인에게 전달되는 첫 번째 인사를 의미합니다. 우리가 보낸 시간은 각자의 가치를 담아 정성껏 포장되어 달려온 기나긴 운송의 과정이며, 이번 전시장은 그 여정이 마침내 세상과 마주하는 도착지이자 상자를 열고 더 넓은 세계로 나아가는 새로운 여정의 시작점입니다. 즉, 전시는 단순히 4년의 마침표를 찍는 결과보고가 아니라, 우리의 작품이라는 상자가 사람들에게 전달되어 새로운 이야기가 시작되는 설레는 첫 만남입니다.",
+    hoursLabel: "시간",
+    hours: (
+      <>
+        Fri-Sun 10:00 - 18:00
+        <br />
+        Mon 10:00 - 17:00
+      </>
+    ),
+    venueLabel: "장소",
+    venue: (
+      <>
+        서울특별시 종로구 대학로 57
+        <br />
+        홍익대학교 대학로 아트센터
+        <br />
+        B2 제 3전시장
+      </>
+    ),
+  },
+  en: {
+    subtitle: (
+      <>
+        2027 Konkuk University Visual Communication &amp; Media Design
+        <br />
+        Graduation Exhibition
+      </>
+    ),
+    body: "‘HELLO WORLD’ marks our first greeting to the world, as four years of ideas and experiences leave the training ground of school and are finally delivered to society. Our time together has been a long journey, carefully packed with our own values. This exhibition is both its destination and a new starting point, where we open the box and step into a wider world. More than the end of four years, it is our first encounter with the world—the moment our work is delivered and a new story begins.",
+    hoursLabel: "Hours",
+    hours: (
+      <>
+        Fri-Sun 10:00 - 18:00
+        <br />
+        Mon 10:00 - 17:00
+      </>
+    ),
+    venueLabel: "Venue",
+    venue: (
+      <>
+        7, Daehak-ro, Jongno-gu,
+        <br />
+        Seoul, Republic of Korea,
+        <br />
+        B2 Exhibition Hall 3
+      </>
+    ),
+  },
+};
 
 function useScrollReveal() {
   const pageRef = useRef(null);
@@ -33,7 +96,7 @@ function useScrollReveal() {
     if (!page) return undefined;
 
     const elements = [...page.querySelectorAll("[data-reveal]")];
-    const pendingTimers = new Set();
+    const pendingReveals = new Set();
     const sectionTwoTrigger = page.querySelector("[data-section-two-trigger]");
     const sectionTwoElements = [
       ...page.querySelectorAll("[data-section-two-item]"),
@@ -54,13 +117,12 @@ function useScrollReveal() {
     });
 
     const revealElement = (element) => {
-      const loadingDelay = getLoadingRevealDelay();
-      const timer = window.setTimeout(() => {
+      const cancel = scheduleReveal(() => {
         element.classList.add("is-visible");
-        pendingTimers.delete(timer);
-      }, loadingDelay);
+        pendingReveals.delete(cancel);
+      });
 
-      pendingTimers.add(timer);
+      pendingReveals.add(cancel);
     };
 
     const createObserver = (options) => {
@@ -127,7 +189,7 @@ function useScrollReveal() {
       sectionTwoObserver.disconnect();
       window.removeEventListener("scroll", revealDirectionalElements);
       window.removeEventListener("resize", revealDirectionalElements);
-      pendingTimers.forEach((timer) => window.clearTimeout(timer));
+      pendingReveals.forEach((cancel) => cancel());
     };
   }, []);
 
@@ -166,8 +228,9 @@ function IntroBackground() {
   );
 }
 
-function PhotoStrip() {
-  const repeatedImages = [...galleryImages, ...galleryImages];
+function PhotoStrip({ isMobile }) {
+  const images = isMobile ? galleryImages.slice(0, 3) : galleryImages;
+  const repeatedImages = isMobile ? images : [...images, ...images];
 
   return (
     <section
@@ -186,6 +249,9 @@ function PhotoStrip() {
 
 function AboutPage() {
   const pageRef = useScrollReveal();
+  const isMobile = useIsMobile();
+  const [language, setLanguage] = useState("ko");
+  const copy = aboutCopy[language];
 
   return (
     <main className="about-page" ref={pageRef}>
@@ -207,34 +273,35 @@ function AboutPage() {
             <div>
               <h1 data-reveal>HELLO WORLD</h1>
               <h2 data-reveal data-reveal-delay="80">
-                2027 Konkuk University Visual Communication &amp; Media Design
-                <br />
-                Graduation Exhibition
+                {isMobile
+                  ? copy.subtitle
+                  : aboutCopy.en.subtitle}
               </h2>
             </div>
             <div className="about-intro-description">
-              <p data-reveal data-reveal-delay="160">
-                이번 졸업 전시 ‘HELLO WORLD’는 지난 4년간 우리가 치열하게
-                고민하며 쌓아온 시간과 경험이 학교라는 훈련장을 떠나 비로소
-                사회라는 수취인에게 전달되는 첫 번째 인사를 의미합니다. 우리가
-                보낸 시간은 각자의 가치를 담아 정성껏 포장되어 달려온 기나긴
-                운송의 과정이며, 이번 전시장은 그 여정이 마침내 세상과 마주하는
-                도착지이자 상자를 열고 더 넓은 세계로 나아가는 새로운 여정의
-                시작점입니다. 즉, 전시는 단순히 4년의 마침표를 찍는 결과보고가
-                아니라, 우리의 작품이라는 상자가 사람들에게 전달되어 새로운
-                이야기가 시작되는 설레는 첫 만남입니다.
-              </p>
-              <p data-reveal data-reveal-delay="240">
-                ‘HELLO WORLD’ marks our first greeting to the world, as four
-                years of ideas and experiences leave the training ground of
-                school and are finally delivered to society. Our time together
-                has been a long journey, carefully packed with our own values.
-                This exhibition is both its destination and a new starting
-                point, where we open the box and step into a wider world. More
-                than the end of four years, it is our first encounter with the
-                world—the moment our work is delivered and a new story begins.
-              </p>
+              {isMobile ? (
+                <p data-reveal data-reveal-delay="160">
+                  {copy.body}
+                </p>
+              ) : (
+                <>
+                  <p data-reveal data-reveal-delay="160">
+                    {aboutCopy.ko.body}
+                  </p>
+                  <p data-reveal data-reveal-delay="240">
+                    {aboutCopy.en.body}
+                  </p>
+                </>
+              )}
             </div>
+            {isMobile ? (
+              <LanguageToggle
+                language={language}
+                onToggle={() =>
+                  setLanguage((current) => (current === "ko" ? "en" : "ko"))
+                }
+              />
+            ) : null}
             <a
               className="about-instagram"
               href="https://www.instagram.com/2027kkuvcd"
@@ -271,7 +338,7 @@ function AboutPage() {
           >
             <img src={infoCard} alt="" />
             <div className="about-info-card-content">
-              <div>
+              <div className="about-info-titles">
                 <h2>
                   2027 건국대학교 디자인대학
                   <br />
@@ -287,32 +354,45 @@ function AboutPage() {
                   (Track VCD) Graduation Exhibition
                 </p>
               </div>
-              <div>
-                <strong>
-                  Fri–Sun 10:00–18:00
-                  <br />
-                  Mon 10:00–17:00
-                </strong>
-                <strong>
-                  서울특별시 종로구 대학로 57
-                  <br />
-                  홍익대학교 대학로 아트센터
-                  <br />
-                  B2 제3전시장
-                </strong>
-                <p>
-                  7, Daehak-ro, Jongno-gu,
-                  <br />
-                  Seoul, Republic of Korea,
-                  <br />
-                  B2 Exhibition Hall 3
-                </p>
-              </div>
+              {isMobile ? (
+                <dl className="about-info-facts">
+                  <div className="about-info-fact">
+                    <dt>{copy.hoursLabel}</dt>
+                    <dd>{copy.hours}</dd>
+                  </div>
+                  <div className="about-info-fact">
+                    <dt>{copy.venueLabel}</dt>
+                    <dd>{copy.venue}</dd>
+                  </div>
+                </dl>
+              ) : (
+                <div>
+                  <strong>
+                    Fri–Sun 10:00–18:00
+                    <br />
+                    Mon 10:00–17:00
+                  </strong>
+                  <strong>
+                    서울특별시 종로구 대학로 57
+                    <br />
+                    홍익대학교 대학로 아트센터
+                    <br />
+                    B2 제3전시장
+                  </strong>
+                  <p>
+                    7, Daehak-ro, Jongno-gu,
+                    <br />
+                    Seoul, Republic of Korea,
+                    <br />
+                    B2 Exhibition Hall 3
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </section>
 
-        <PhotoStrip />
+        <PhotoStrip isMobile={isMobile} />
 
         <section className="about-contributors">
           <h2 data-reveal>CONTRIBUTORS</h2>

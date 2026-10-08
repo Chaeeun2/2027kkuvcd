@@ -1,12 +1,29 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import LanguageToggle from "../components/LanguageToggle";
 import WorkCard from "../components/WorkCard";
 import WorksFilters from "../components/WorksFilters";
 import { workCategories, works, workWorlds } from "../data/works";
-import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
+import useIsMobile from "../hooks/useIsMobile";
+import { scheduleReveal } from "../utils/loadingReveal";
 import "../works.css";
+
+const CARD_REVEAL_STEP = 80;
+
+/* 한 줄 안에서 왼쪽 카드부터 차례로 들어오도록 화면에 실제로 놓인 열 순서를 쓴다. */
+function getWorkRevealDelay(element) {
+  const grid = element.closest(".works-grid");
+  if (!grid) return Number(element.dataset.revealDelay ?? 0);
+
+  const columnCount = getComputedStyle(grid)
+    .gridTemplateColumns.split(" ")
+    .filter(Boolean).length;
+  const index = [...grid.children].indexOf(element);
+
+  return (index % Math.max(columnCount, 1)) * CARD_REVEAL_STEP;
+}
 
 function WorkGrid({ items, threeColumns = false }) {
   if (items.length === 0) {
@@ -18,8 +35,8 @@ function WorkGrid({ items, threeColumns = false }) {
       className={`works-grid${threeColumns ? " works-grid--three-columns" : ""}`}
       aria-label="졸업 전시 작품"
     >
-      {items.map((work, index) => (
-        <WorkCard index={index} work={work} key={work.id} />
+      {items.map((work) => (
+        <WorkCard work={work} key={work.id} />
       ))}
     </section>
   );
@@ -27,6 +44,8 @@ function WorkGrid({ items, threeColumns = false }) {
 
 function WorksPage() {
   const pageRef = useRef(null);
+  const isMobile = useIsMobile();
+  const [language, setLanguage] = useState("ko");
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get("category");
   const worldParam = searchParams.get("world");
@@ -60,20 +79,19 @@ function WorksPage() {
         "[data-work-reveal]:not(.is-visible)",
       ),
     ];
-    const timers = new Set();
+    const pendingReveals = new Set();
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
 
-          const delay = Number(entry.target.dataset.revealDelay ?? 0);
-          const loadingDelay = getLoadingRevealDelay();
-          const timer = window.setTimeout(() => {
+          const delay = getWorkRevealDelay(entry.target);
+          const cancel = scheduleReveal(() => {
             entry.target.classList.add("is-visible");
-            timers.delete(timer);
-          }, delay + loadingDelay);
+            pendingReveals.delete(cancel);
+          }, delay);
 
-          timers.add(timer);
+          pendingReveals.add(cancel);
           observer.unobserve(entry.target);
         });
       },
@@ -84,7 +102,7 @@ function WorksPage() {
 
     return () => {
       observer.disconnect();
-      timers.forEach((timer) => window.clearTimeout(timer));
+      pendingReveals.forEach((cancel) => cancel());
     };
   }, [filteredWorks]);
 
@@ -113,8 +131,28 @@ function WorksPage() {
                 data-work-reveal
               >
                 <h1>{selectedWorld.label}</h1>
-                <p>{selectedWorld.descriptionKo}</p>
-                <p>{selectedWorld.descriptionEn}</p>
+                {isMobile ? (
+                  <>
+                    <p>
+                      {language === "ko"
+                        ? selectedWorld.descriptionKo
+                        : selectedWorld.descriptionEn}
+                    </p>
+                    <LanguageToggle
+                      language={language}
+                      onToggle={() =>
+                        setLanguage((current) =>
+                          current === "ko" ? "en" : "ko",
+                        )
+                      }
+                    />
+                  </>
+                ) : (
+                  <>
+                    <p>{selectedWorld.descriptionKo}</p>
+                    <p>{selectedWorld.descriptionEn}</p>
+                  </>
+                )}
               </aside>
               <WorkGrid items={filteredWorks} threeColumns />
             </div>

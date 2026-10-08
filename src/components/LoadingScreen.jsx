@@ -5,7 +5,10 @@ function LoadingScreen({
   fadeDuration,
   isLeaving,
   onFadeComplete,
+  progress,
 }) {
+  const isTracking = typeof progress === "number";
+
   return (
     <div
       className={`loading-screen${isLeaving ? " is-leaving" : ""}`}
@@ -19,7 +22,7 @@ function LoadingScreen({
         }
       }}
       role="status"
-      aria-label="3D 모델 로딩 중"
+      aria-label="페이지 로딩 중"
       style={{
         "--loading-duration": `${duration}ms`,
         "--loading-fade-duration": `${fadeDuration}ms`,
@@ -33,8 +36,12 @@ function LoadingScreen({
           role="progressbar"
           aria-valuemin="0"
           aria-valuemax="100"
+          aria-valuenow={isTracking ? Math.round(progress * 100) : undefined}
         >
-          <span className="loading-progress" />
+          <span
+            className={`loading-progress${isTracking ? " is-tracking" : ""}`}
+            style={isTracking ? { transform: `scaleX(${progress})` } : undefined}
+          />
         </div>
       </div>
     </div>

@@ -1,15 +1,17 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import LanguageToggle from "../components/LanguageToggle";
 import WorksFilters from "../components/WorksFilters";
+import useIsMobile from "../hooks/useIsMobile";
 import projectArrow from "../assets/designer-work-arrow.png";
 import {
   getWorkById,
   workCategories,
   workWorlds,
 } from "../data/works";
-import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
+import { scheduleReveal } from "../utils/loadingReveal";
 import "../works.css";
 import "../work-detail.css";
 
@@ -23,6 +25,8 @@ function GalleryImage({ image }) {
 
 function WorkDetailPage() {
   const pageRef = useRef(null);
+  const isMobile = useIsMobile();
+  const [language, setLanguage] = useState("ko");
   const navigate = useNavigate();
   const { workId } = useParams();
   const work = getWorkById(workId);
@@ -32,19 +36,18 @@ function WorkDetailPage() {
     if (!page) return undefined;
 
     const elements = [...page.querySelectorAll("[data-work-detail-reveal]")];
-    const timers = new Set();
+    const pendingReveals = new Set();
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
 
-          const loadingDelay = getLoadingRevealDelay();
-          const timer = window.setTimeout(() => {
+          const cancel = scheduleReveal(() => {
             entry.target.classList.add("is-visible");
-            timers.delete(timer);
-          }, loadingDelay);
+            pendingReveals.delete(cancel);
+          });
 
-          timers.add(timer);
+          pendingReveals.add(cancel);
           observer.unobserve(entry.target);
         });
       },
@@ -54,7 +57,7 @@ function WorkDetailPage() {
     elements.forEach((element) => observer.observe(element));
     return () => {
       observer.disconnect();
-      timers.forEach((timer) => window.clearTimeout(timer));
+      pendingReveals.forEach((cancel) => cancel());
     };
   }, [workId]);
 
@@ -74,12 +77,12 @@ function WorkDetailPage() {
       <div className="work-detail-content">
         <WorksFilters
           categories={workCategories}
-          category="all"
+          category={work.categoryIds}
           onCategoryChange={(value) =>
             goToFilteredWorks("category", value)
           }
           onWorldChange={(value) => goToFilteredWorks("world", value)}
-          world="all"
+          world={work.worldType}
           worlds={workWorlds}
         />
 
@@ -100,8 +103,28 @@ function WorkDetailPage() {
                 className="work-detail-description"
                 data-work-detail-reveal
               >
-                <p>{work.detail.descriptionKo}</p>
-                <p>{work.detail.descriptionEn}</p>
+                {isMobile ? (
+                  <>
+                    <p>
+                      {language === "ko"
+                        ? work.detail.descriptionKo
+                        : work.detail.descriptionEn}
+                    </p>
+                    <LanguageToggle
+                      language={language}
+                      onToggle={() =>
+                        setLanguage((current) =>
+                          current === "ko" ? "en" : "ko",
+                        )
+                      }
+                    />
+                  </>
+                ) : (
+                  <>
+                    <p>{work.detail.descriptionKo}</p>
+                    <p>{work.detail.descriptionEn}</p>
+                  </>
+                )}
               </div>
 
               <div

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
  * 사진, 상세 상단의 아이디카드) CSS만으로는 갈라낼 수 없다. 이 값은 styles.css의
  * 모바일 미디어 쿼리와 같은 경계를 써야 한다.
  */
-const MOBILE_QUERY = "(max-width: 767px)";
+export const MOBILE_QUERY = "(max-width: 767px)";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(

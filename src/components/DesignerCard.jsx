@@ -1,14 +1,13 @@
 import { Link } from "react-router-dom";
 import { formatEnglishName, getDesignerDetail } from "../data/designers";
 
-function DesignerCard({ designer, index, isMobile = false }) {
+function DesignerCard({ designer, isMobile = false }) {
   const { backImage, colorScheme, englishName, frontImage, id, koreanName } =
     designer;
 
   const commonProps = {
     "aria-label": `${koreanName}, ${englishName} 디자이너 상세 보기`,
     "data-designer-card": true,
-    style: { "--card-reveal-delay": `${(index % 3) * 80}ms` },
     to: `/designers/${id}`,
   };
 

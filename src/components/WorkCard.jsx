@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
 
-function WorkCard({ index, work }) {
+function WorkCard({ work }) {
   return (
     <Link
       className="work-card"
       data-work-reveal
-      data-reveal-delay={(index % 4) * 80}
       to={`/works/${work.id}`}
     >
       <div className="work-card__thumbnail">

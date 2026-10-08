@@ -11,7 +11,7 @@ import {
 } from "../data/designers";
 import { getWorksByDesignerId } from "../data/designerWorks";
 import useIsMobile from "../hooks/useIsMobile";
-import { getLoadingRevealDelay } from "../utils/loadingRevealDelay";
+import { scheduleReveal } from "../utils/loadingReveal";
 import "../designer-detail.css";
 
 const emptyProjects = Array.from({ length: 3 }, (_, index) => ({
@@ -33,20 +33,19 @@ function useDetailReveal() {
     if (!page) return undefined;
 
     const elements = [...page.querySelectorAll("[data-detail-reveal]")];
-    const timers = new Set();
+    const pendingReveals = new Set();
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
 
           const delay = Number(entry.target.dataset.revealDelay ?? 0);
-          const loadingDelay = getLoadingRevealDelay();
-          const timer = window.setTimeout(() => {
+          const cancel = scheduleReveal(() => {
             entry.target.classList.add("is-visible");
-            timers.delete(timer);
-          }, delay + loadingDelay);
+            pendingReveals.delete(cancel);
+          }, delay);
 
-          timers.add(timer);
+          pendingReveals.add(cancel);
           observer.unobserve(entry.target);
         });
       },
@@ -57,7 +56,7 @@ function useDetailReveal() {
 
     return () => {
       observer.disconnect();
-      timers.forEach((timer) => window.clearTimeout(timer));
+      pendingReveals.forEach((cancel) => cancel());
     };
   }, []);
 
@@ -84,8 +83,8 @@ function DesignerDetailPage() {
     : emptyProjects;
   const displayKoreanName = designer.koreanName;
   const displayEnglishName = formatEnglishName(designer.englishName);
-  // 모바일 시안은 세로 프로필 사진 대신 가로 아이디카드를 머리에 둔다.
-  const headerImage = isMobile ? designer.frontImage : detail.profileImage;
+  // 모바일 시안은 세로 프로필 사진 대신 가로 아이디카드 뒷면을 머리에 둔다.
+  const headerImage = isMobile ? designer.backImage : detail.profileImage;
 
   return (
     <main className="designer-detail-page" ref={pageRef}>

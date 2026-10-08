@@ -26,8 +26,11 @@
   --font-accent: var(--font-body);
   --font-korean: "Pretendard", sans-serif;
 
-  /* 레이아웃 기준값. 태블릿/모바일 구간에서 미디어 쿼리로 덮어쓴다. */
-  --page-min-width: 1440px;
+  /*
+   * 레이아웃 기준값. 태블릿/모바일 구간에서 미디어 쿼리로 덮어쓴다.
+   * --page-content-width는 최대 폭이다. 화면이 더 좁으면 좌우 --page-gutter를
+   * 남기고 콘텐츠가 줄어든다.
+   */
   --page-min-height: 900px;
   --page-gutter: 80px;
   --page-content-width: 1280px;
@@ -36,6 +39,7 @@
   --header-padding-bottom: 40px;
   --header-logo-width: 120px;
   --header-logo-height: 54px;
+  --nav-gap: 64px;
   --footer-height: 160px;
   --footer-logo-width: 106.5px;
   --footer-logo-height: 48px;
@@ -80,13 +84,17 @@
 html,
 body,
 #root {
-  min-width: var(--page-min-width);
   min-height: var(--page-min-height);
   margin: 0;
 }
 
+/* 화면 밖으로 빠지는 장식 요소가 있어도 가로 스크롤은 만들지 않는다. */
+html,
 body {
-  overflow: auto;
+  overflow-x: clip;
+}
+
+body {
   background: var(--color-background);
 }
 
@@ -97,8 +105,7 @@ a {
 
 .entry-page {
   position: relative;
-  width: 100vw;
-  min-width: var(--page-min-width);
+  width: 100%;
   height: 100dvh;
   min-height: var(--page-min-height);
   overflow: hidden;
@@ -113,7 +120,7 @@ a {
   display: flex;
   width: 100%;
   height: var(--header-height);
-  align-items: var(--header-align, flex-end);
+  align-items: var(--header-align, flex-start);
   justify-content: space-between;
   padding: var(--header-padding-top) var(--page-gutter)
     var(--header-padding-bottom);
@@ -144,7 +151,7 @@ a {
 .site-navigation {
   display: flex;
   align-items: center;
-  gap: 64px;
+  gap: var(--nav-gap);
   color: var(--color-brand);
   font-family: var(--font-display);
   font-size: var(--font-size-nav);
@@ -162,6 +169,10 @@ a {
   opacity: 0.68;
 }
 
+.site-navigation a.active {
+  opacity: 1;
+}
+
 /* 햄버거 버튼과 닫기 버튼, 드로어 바깥 영역은 모바일에서만 쓴다. */
 .site-menu-toggle,
 .site-menu-close,
@@ -169,10 +180,34 @@ a {
   display: none;
 }
 
+.site-footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 100%;
+  height: var(--footer-height);
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 56px var(--page-gutter);
+  background: var(--color-footer-overlay);
+}
+
+.site-footer p {
+  margin: 0;
+  font-family: var(--font-accent);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+}
+
+.site-footer img {
+  width: var(--footer-logo-width);
+  height: var(--footer-logo-height);
+  object-fit: cover;
+}
+
 .hero {
   position: relative;
   width: 100%;
-  min-width: var(--page-min-width);
   height: 100dvh;
   min-height: var(--page-min-height);
 }
@@ -235,9 +270,6 @@ a {
   z-index: 100;
   inset: 0;
   display: grid;
-  width: 100vw;
-  height: 100dvh;
-  min-width: var(--page-min-width);
   min-height: var(--page-min-height);
   place-items: center;
   background: var(--color-background);
@@ -245,8 +277,8 @@ a {
 }
 
 .loading-screen.is-leaving {
-  animation: loading-screen-fade-out
-    var(--loading-fade-duration, 1.5s) ease forwards;
+  animation: loading-screen-fade-out var(--loading-fade-duration, 1.5s) ease
+    forwards;
   pointer-events: none;
 }
 
@@ -294,35 +326,105 @@ a {
   animation: loading-progress var(--loading-duration, 1s) linear forwards;
 }
 
+.loading-progress.is-tracking {
+  animation: none;
+  transition: transform 300ms ease-out;
+}
+
 @keyframes loading-progress {
   to {
     transform: scaleX(1);
   }
 }
 
+.language-toggle {
+  display: none;
+}
+
 /*
  * 반응형 구간은 세 단계다.
- *   1440px 이상  : PC 디자인 원본 그대로.
- *   768~1439px   : PC 레이아웃을 유지하고 폰트와 여백만 줄인다.
- *   767px 이하   : 피그마 모바일 시안(402px 기준) 레이아웃으로 전환한다.
- * 값은 전부 :root 토큰으로만 바꾸고, 레이아웃 구조는 각 페이지 CSS에서 다룬다.
+ *   1440px 이상     : PC 디자인 원본 그대로.
+ *   1080~1439px     : PC 레이아웃을 유지하고 폰트·여백만 약간 줄인다.
+ *   768~1079px      : 여전히 PC 구조. 폭에 맞춰 토큰만 더 줄인다.
+ *   767px 이하      : 피그마 모바일 시안 레이아웃으로 전환한다.
  */
+@media (max-width: 1439px) and (min-width: 1080px) {
+  :root {
+    --page-min-height: 0;
+    --page-gutter: 48px;
+    --header-height: 112px;
+    --header-padding-top: 28px;
+    --header-padding-bottom: 28px;
+    --header-logo-width: 100px;
+    --header-logo-height: 45px;
+    --nav-gap: 48px;
+    --font-size-hero-title: 80px;
+    --font-size-hero-hint: 18px;
+    --font-size-page-title: 32px;
+    --font-size-detail-title: 28px;
+    --font-size-name-ko: 28px;
+    --font-size-name-en: 28px;
+    --font-size-section-title: 22px;
+    --font-size-world-title: 22px;
+    --font-size-project-title: 22px;
+    --font-size-lead: 18px;
+    --font-size-card-title: 18px;
+    --font-size-filter: 16px;
+    --font-size-world-chip: 16px;
+  }
+
+  .hero-title {
+    width: auto;
+    max-width: 92%;
+    height: auto;
+  }
+}
+
+@media (max-width: 1079px) and (min-width: 768px) {
+  :root {
+    --page-min-height: 0;
+    --page-gutter: 32px;
+    --header-height: 96px;
+    --header-padding-top: 22px;
+    --header-padding-bottom: 22px;
+    --header-logo-width: 88px;
+    --header-logo-height: 40px;
+    --nav-gap: 28px;
+    --font-size-hero-title: 56px;
+    --font-size-hero-hint: 16px;
+    --font-size-page-title: 26px;
+    --font-size-detail-title: 24px;
+    --font-size-name-ko: 24px;
+    --font-size-name-en: 24px;
+    --font-size-section-title: 20px;
+    --font-size-world-title: 20px;
+    --font-size-project-title: 20px;
+    --font-size-lead: 16px;
+    --font-size-card-title: 16px;
+    --font-size-filter: 16px;
+    --font-size-world-chip: 15px;
+  }
+
+  .hero-title {
+    width: auto;
+    max-width: 92%;
+    height: auto;
+  }
+}
+
 @media (max-width: 767px) {
   :root {
-    --page-min-width: 0;
     --page-min-height: 0;
     --page-gutter: 16px;
-    --page-content-width: 100%;
 
-    /* 로고와 햄버거의 윗변을 시안대로 화면 상단에서 95px에 맞춘다. */
-    --header-height: 127.5px;
-    --header-padding-top: 95px;
+    --header-height: 48.5px;
+    --header-padding-top: 16px;
     --header-padding-bottom: 0px;
     --header-align: flex-start;
     --header-logo-width: 72px;
     --header-logo-height: 32.5px;
-    --loading-logo-width: 136.5px;
-    --loading-logo-height: 73px;
+    --loading-logo-width: 129.28px;
+    --loading-logo-height: 58.43px;
 
     --font-size-hero-title: 28px;
     --font-size-hero-hint: 16px;
@@ -345,15 +447,8 @@ a {
     --font-size-micro: 13px;
   }
 
-  /*
-   * 모바일 시안에는 푸터가 없다. 페이지별 규칙이 .about-page .site-footer 처럼
-   * 선택자 두 개로 선언되어 있어 같은 특이도로 맞춰 준다.
-   */
-  .about-page .site-footer,
-  .designers-page .site-footer,
-  .designer-detail-page .site-footer,
-  .works-page .site-footer,
-  .work-detail-page .site-footer {
+  /* 모바일 시안에는 푸터가 없다. */
+  .site-footer {
     display: none;
   }
 
@@ -401,7 +496,7 @@ a {
     flex-direction: column;
     align-items: stretch;
     gap: 15px;
-    padding: 154.5px var(--page-gutter) 0;
+    padding: 75.5px var(--page-gutter) 0;
     background: #ffffff;
     visibility: hidden;
     transform: translateX(100%);
@@ -431,7 +526,7 @@ a {
 
   .site-menu-close {
     position: absolute;
-    top: 95px;
+    top: 16px;
     right: var(--page-gutter);
     display: block;
     width: 18px;
@@ -473,5 +568,20 @@ a {
 
   .interaction-hint {
     bottom: 15.8%;
+  }
+
+  .language-toggle {
+    display: inline-block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-brand);
+    font-family: var(--font-korean);
+    font-size: var(--font-size-small);
+    font-weight: 500;
+    line-height: 1.5;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
   }
 }
