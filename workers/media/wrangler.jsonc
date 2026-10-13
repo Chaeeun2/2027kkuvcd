@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "kkuvcd-2027-media",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "kkuvcd-2027-media"
+    }
+  ],
+  "vars": {
+    "FIREBASE_PROJECT_ID": "kkuvcd-2027-web",
+    "ALLOWED_ORIGINS": "https://kkuvcd-2027-web.web.app,https://kkuvcd-2027-web.firebaseapp.com,http://localhost:5173",
+    "MAX_UPLOAD_BYTES": "10485760"
+  }
+}

@@ -1,4 +1,4 @@
-import { designers } from "./designers";
+import { defaultDesigners } from "./designers";
 
 export const workCategories = [
   { id: "all", label: "ALL" },
@@ -44,110 +44,52 @@ export const workWorlds = [
   },
 ];
 
-const categoryOptions = [
-  { id: "branding", label: "브랜딩" },
-  { id: "media", label: "미디어" },
-  { id: "editorial", label: "편집" },
-  { id: "experiment", label: "실험" },
-];
+/* 작품 상세와 디자이너 페이지에 보이는 카테고리 이름 */
+export const categoryLabels = {
+  branding: "브랜딩",
+  media: "미디어",
+  editorial: "편집",
+  experiment: "실험",
+};
 
-const worldOptions = ["my-world", "your-world", "new-world", "re-world"];
+export const GALLERY_LAYOUTS = {
+  wide: { label: "한 장", imageCount: 1 },
+  split: { label: "두 장", imageCount: 2 },
+  video: { label: "영상", imageCount: 0 },
+};
 
-const galleryTemplate = [
-  {
-    id: "gallery-1",
-    layout: "wide",
-    images: [{ src: null, alt: "상세 이미지 1" }],
-  },
-  {
-    id: "gallery-2",
-    layout: "split",
-    images: [
-      { src: null, alt: "상세 이미지 2" },
-      { src: null, alt: "상세 이미지 3" },
-    ],
-  },
-  {
-    id: "gallery-3",
-    layout: "wide",
-    images: [{ src: null, alt: "상세 이미지 4" }],
-  },
-  {
-    id: "gallery-4",
-    layout: "wide",
-    images: [{ src: null, alt: "상세 이미지 5" }],
-  },
-  {
-    id: "gallery-5",
-    layout: "wide",
-    images: [{ src: null, alt: "상세 이미지 6" }],
-  },
-];
+const categoryIds = Object.keys(categoryLabels);
+const worldIds = workWorlds.slice(1).map((world) => world.id);
 
-function createWorkId(designerId, projectNumber) {
-  return `${designerId}-project-${projectNumber}`;
-}
-
-function createRelatedProjects(
-  designerId,
-  designerIndex,
-  currentProjectNumber,
-) {
-  return [1, 2, 3]
-    .filter((projectNumber) => projectNumber !== currentProjectNumber)
-    .map((projectNumber) => {
-      const category =
-        categoryOptions[
-          (designerIndex + projectNumber - 1) % categoryOptions.length
-        ];
-
-      return {
-        id: `${designerId}-related-${projectNumber}`,
-        title: `Project${projectNumber}`,
-        categoryLabel: category.label,
-        thumbnail: null,
-        workId: createWorkId(designerId, projectNumber),
-      };
-    });
-}
-
-function createWork(designer, designerIndex, projectNumber) {
-  const title = `Project${projectNumber}`;
-  const category =
-    categoryOptions[(designerIndex + projectNumber - 1) % categoryOptions.length];
-  const worldType =
-    worldOptions[(designerIndex + projectNumber - 1) % worldOptions.length];
-
-  return {
-    id: createWorkId(designer.id, projectNumber),
-    title,
-    designer: {
-      id: designer.id,
-      name: designer.koreanName,
-    },
-    thumbnail: null,
-    categoryIds: [category.id],
-    worldType,
-    detail: {
-      categoryLabel: category.label,
-      descriptionKo: `${title}의 프로젝트 설명입니다. 실제 작품 소개가 준비되면 이 내용을 수정해 주세요.`,
-      descriptionEn: `This is the description for ${title}. Replace this text when the final project description is ready.`,
-      relatedProjects: createRelatedProjects(
-        designer.id,
-        designerIndex,
-        projectNumber,
-      ),
-      gallery: galleryTemplate,
-    },
-  };
-}
-
-export const works = designers.flatMap((designer, designerIndex) =>
-  [1, 2, 3].map((projectNumber) =>
-    createWork(designer, designerIndex, projectNumber),
-  ),
+const placeholderGallery = ["wide", "split", "wide", "wide", "wide"].map(
+  (layout, index) => ({
+    id: `gallery-${index + 1}`,
+    layout,
+    images: Array(GALLERY_LAYOUTS[layout].imageCount).fill(null),
+    videoUrl: "",
+  }),
 );
 
-export function getWorkById(id) {
-  return works.find((work) => work.id === id);
-}
+/* 관리자 화면에서 공개한 작품이 하나도 없을 때 보여 주는 자리표시 작품 */
+export const placeholderWorks = defaultDesigners.flatMap((designer, designerIndex) =>
+  [1, 2, 3].map((projectNumber, projectIndex) => {
+    const title = `Project${projectNumber}`;
+    const offset = designerIndex + projectIndex;
+
+    return {
+      id: `${designer.id}-project-${projectNumber}`,
+      title,
+      designerIds: [designer.id],
+      thumbnail: null,
+      categoryIds: [categoryIds[offset % categoryIds.length]],
+      worldType: worldIds[offset % worldIds.length],
+      description: {
+        ko: `${title}의 프로젝트 설명입니다. 실제 작품 소개가 준비되면 이 내용을 수정해 주세요.`,
+        en: `This is the description for ${title}. Replace this text when the final project description is ready.`,
+      },
+      gallery: placeholderGallery,
+      order: designerIndex * 3 + projectIndex,
+      published: true,
+    };
+  }),
+);

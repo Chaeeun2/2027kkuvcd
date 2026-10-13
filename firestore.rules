@@ -1,0 +1,35 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 관리자 계정은 콘솔에서 admins/{uid} 문서를 직접 만들어 지정한다.
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // 사이트가 읽는 페이지 콘텐츠. 누구나 읽고 관리자만 쓴다.
+    match /pages/{pageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 작품. 공개된 작품만 누구나 읽고, 비공개 작품은 관리자만 본다.
+    match /works/{workId} {
+      allow read: if isAdmin() || resource.data.published == true;
+      allow write: if isAdmin();
+    }
+
+    // 디자이너. 누구나 읽고 관리자만 쓴다.
+    match /designers/{designerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 본인 문서만 읽을 수 있다. 미디어 Worker도 이 읽기로 관리자를 확인한다.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}

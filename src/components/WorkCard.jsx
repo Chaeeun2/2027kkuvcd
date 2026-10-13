@@ -11,7 +11,7 @@ function WorkCard({ work }) {
         {work.thumbnail ? (
           <img
             className="work-card__image"
-            src={work.thumbnail}
+            src={work.thumbnail.src}
             alt={`${work.title} 작품`}
           />
         ) : null}
@@ -19,7 +19,7 @@ function WorkCard({ work }) {
 
       <div className="work-card__copy">
         <h2>{work.title}</h2>
-        <p>{work.designer.name}</p>
+        <p>{work.designers.map((designer) => designer.name).join(", ")}</p>
       </div>
     </Link>
   );

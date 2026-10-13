@@ -3,12 +3,20 @@ import DesignerCard from "../components/DesignerCard";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import searchIcon from "../assets/search-icon.svg";
-import { designers, formatEnglishName } from "../data/designers";
+import { getCachedDesigners, loadDesigners } from "../content/designersContent";
+import usePageContent from "../content/usePageContent";
+import { formatEnglishName } from "../data/designers";
 import useIsMobile from "../hooks/useIsMobile";
 import { scheduleReveal } from "../utils/loadingReveal";
 import "../designers.css";
 
 function DesignersPage() {
+  const designers = usePageContent(getCachedDesigners, loadDesigners);
+  if (!designers) return <main className="designers-page" />;
+  return <DesignersPageContent designers={designers} />;
+}
+
+function DesignersPageContent({ designers }) {
   const pageRef = useRef(null);
   const isMobile = useIsMobile();
   const [query, setQuery] = useState("");
@@ -26,7 +34,7 @@ function DesignersPage() {
         english.includes(needle)
       );
     });
-  }, [isMobile, query]);
+  }, [designers, isMobile, query]);
 
   useEffect(() => {
     const cards = [

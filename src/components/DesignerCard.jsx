@@ -1,9 +1,16 @@
 import { Link } from "react-router-dom";
-import { formatEnglishName, getDesignerDetail } from "../data/designers";
+import { formatEnglishName } from "../data/designers";
 
 function DesignerCard({ designer, isMobile = false }) {
-  const { backImage, colorScheme, englishName, frontImage, id, koreanName } =
-    designer;
+  const {
+    backImage,
+    colorScheme,
+    englishName,
+    frontImage,
+    id,
+    koreanName,
+    profileImage,
+  } = designer;
 
   const commonProps = {
     "aria-label": `${koreanName}, ${englishName} 디자이너 상세 보기`,
@@ -16,8 +23,6 @@ function DesignerCard({ designer, isMobile = false }) {
    * 아래에 둔다. 뒤집히지도 않으므로 뒷면 이미지를 받지 않도록 구조를 따로 쓴다.
    */
   if (isMobile) {
-    const { profileImage } = getDesignerDetail(designer);
-
     return (
       <Link className="designer-card designer-card--portrait" {...commonProps}>
         <div className="designer-card__photo">

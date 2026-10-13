@@ -1,0 +1,872 @@
+/*
+ * 관리자 화면 전용 스타일. 사이트 전역 스타일(검정 배경, 디스플레이 폰트)과
+ * 섞이지 않도록 모든 값은 .admin-root 아래 변수로만 쓴다.
+ */
+.admin-root {
+  --admin-color-bg: #f2f2f2;
+  --admin-color-surface: #ffffff;
+  --admin-color-subtle: #f7f7f7;
+  --admin-color-hover: #efefef;
+  --admin-color-border: #eaeaea;
+  --admin-color-border-strong: #d6d6d6;
+  --admin-color-text: #000000;
+  --admin-color-muted: #666666;
+  --admin-color-placeholder: #a8a8a8;
+  --admin-color-primary: #000000;
+  --admin-color-primary-hover: #333333;
+  --admin-color-on-primary: #ffffff;
+  --admin-color-danger: #dc3545;
+  --admin-color-danger-hover: #c82333;
+  --admin-color-focus: #003bd3;
+  --admin-color-overlay: rgba(0, 0, 0, 0.04);
+
+  --admin-font: var(--font-korean);
+  --admin-font-size-xs: 13px;
+  --admin-font-size-sm: 14px;
+  --admin-font-size-base: 16px;
+  --admin-font-size-md: 18px;
+  --admin-font-size-lg: 20px;
+  --admin-font-size-xl: 26px;
+
+  --admin-space-1: 4px;
+  --admin-space-2: 8px;
+  --admin-space-3: 12px;
+  --admin-space-4: 16px;
+  --admin-space-5: 20px;
+  --admin-space-6: 24px;
+  --admin-space-8: 32px;
+  --admin-space-10: 40px;
+
+  --admin-radius-sm: 6px;
+  --admin-radius: 8px;
+  --admin-radius-lg: 10px;
+
+  --admin-sidebar-width: 220px;
+  --admin-content-max-width: 1100px;
+  --admin-control-height: 42px;
+  --admin-thumb-width: 140px;
+  --admin-transition: 160ms ease;
+
+  min-height: 100vh;
+  background: var(--admin-color-bg);
+  color: var(--admin-color-text);
+  font-family: var(--admin-font);
+  font-size: var(--admin-font-size-base);
+  line-height: 1.5;
+}
+
+/* 사이트 body의 검정 배경이 스크롤 끝에서 비치지 않게 한다. */
+body:has(.admin-root) {
+  background: #f2f2f2;
+}
+
+.admin-root :where(h1, h2, p, figure) {
+  margin: 0;
+}
+
+/* ----- 공통 컨트롤 ----- */
+
+.admin-button {
+  display: inline-flex;
+  min-height: var(--admin-control-height);
+  align-items: center;
+  justify-content: center;
+  gap: var(--admin-space-2);
+  padding: 0 var(--admin-space-4);
+  border: 0;
+  border-radius: var(--admin-radius);
+  background: var(--admin-color-hover);
+  color: var(--admin-color-text);
+  font: inherit;
+  font-size: var(--admin-font-size-base);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--admin-transition);
+}
+
+.admin-button:hover:not(:disabled) {
+  background: var(--admin-color-border-strong);
+}
+
+.admin-button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.admin-button--primary {
+  background: var(--admin-color-primary);
+  color: var(--admin-color-on-primary);
+}
+
+.admin-button--primary:hover:not(:disabled) {
+  background: var(--admin-color-primary-hover);
+}
+
+.admin-button--danger {
+  background: var(--admin-color-danger);
+  color: var(--admin-color-on-primary);
+}
+
+.admin-button--danger:hover:not(:disabled) {
+  background: var(--admin-color-danger-hover);
+}
+
+.admin-button--small {
+  min-height: 32px;
+  padding: 0 var(--admin-space-3);
+  font-size: var(--admin-font-size-sm);
+}
+
+.admin-button--block {
+  width: 100%;
+}
+
+.admin-input {
+  width: 100%;
+  min-height: var(--admin-control-height);
+  padding: 9px var(--admin-space-3);
+  border: 1px solid var(--admin-color-border-strong);
+  border-radius: var(--admin-radius-lg);
+  background: var(--admin-color-surface);
+  color: var(--admin-color-text);
+  font: inherit;
+  font-size: var(--admin-font-size-base);
+  font-weight: 500;
+}
+
+.admin-input::placeholder {
+  color: var(--admin-color-placeholder);
+}
+
+textarea.admin-input {
+  min-height: 0;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.admin-root :focus-visible {
+  outline: 2px solid var(--admin-color-focus);
+  outline-offset: 2px;
+}
+
+.admin-input:focus-visible {
+  border-color: var(--admin-color-focus);
+  outline: 0;
+}
+
+.admin-error {
+  color: var(--admin-color-danger);
+  font-size: var(--admin-font-size-sm);
+  font-weight: 600;
+}
+
+.admin-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--admin-space-2);
+}
+
+.admin-back-link {
+  display: inline-block;
+  margin-bottom: var(--admin-space-1);
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-sm);
+  font-weight: 600;
+}
+
+.admin-back-link:hover {
+  color: var(--admin-color-text);
+}
+
+.admin-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 2px var(--admin-space-2);
+  border-radius: var(--admin-radius-sm);
+  background: var(--admin-color-hover);
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-xs);
+  font-weight: 600;
+}
+
+.admin-badge.is-on {
+  background: var(--admin-color-primary);
+  color: var(--admin-color-on-primary);
+}
+
+.admin-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--admin-space-4);
+  padding: var(--admin-space-6);
+  border: 1px solid var(--admin-color-border-strong);
+  border-radius: var(--admin-radius-lg);
+  background: var(--admin-color-surface);
+  font-weight: 500;
+}
+
+.admin-link-list {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-link-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--admin-space-3);
+  padding: var(--admin-space-3) 0;
+  border-bottom: 1px solid var(--admin-color-border);
+}
+
+.admin-link-list a {
+  font-weight: 600;
+}
+
+.admin-link-list a:hover {
+  text-decoration: underline;
+}
+
+.admin-empty {
+  width: 100%;
+  padding: var(--admin-space-8) var(--admin-space-4);
+  border-radius: var(--admin-radius);
+  background: var(--admin-color-subtle);
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-sm);
+  text-align: center;
+}
+
+.admin-count {
+  margin-left: var(--admin-space-1);
+  color: var(--admin-color-muted);
+  font-weight: 500;
+}
+
+.admin-screen-message {
+  padding: var(--admin-space-10);
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-md);
+}
+
+/* ----- 입력 필드 ----- */
+
+.admin-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--admin-space-2);
+}
+
+.admin-field__header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--admin-space-4);
+}
+
+.admin-field__label {
+  font-size: var(--admin-font-size-base);
+  font-weight: 600;
+}
+
+.admin-field__hint {
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-sm);
+}
+
+.admin-field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--admin-space-5);
+}
+
+.admin-field-row > .admin-field,
+.admin-field > .admin-input {
+  width: 100%;
+}
+
+.admin-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--admin-space-2);
+}
+
+.admin-choice {
+  min-height: 34px;
+  padding: 0 var(--admin-space-3);
+  border: 1px solid var(--admin-color-border-strong);
+  border-radius: 999px;
+  background: var(--admin-color-surface);
+  color: var(--admin-color-text);
+  font: inherit;
+  font-size: var(--admin-font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--admin-transition),
+    border-color var(--admin-transition);
+}
+
+.admin-choice:hover {
+  border-color: var(--admin-color-text);
+}
+
+.admin-choice[aria-pressed="true"] {
+  border-color: var(--admin-color-primary);
+  background: var(--admin-color-primary);
+  color: var(--admin-color-on-primary);
+}
+
+.admin-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--admin-space-3);
+  cursor: pointer;
+}
+
+.admin-switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.admin-switch__track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--admin-color-border-strong);
+  transition: background-color var(--admin-transition);
+}
+
+.admin-switch__track::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--admin-color-surface);
+  content: "";
+  transition: transform var(--admin-transition);
+}
+
+.admin-switch input:checked + .admin-switch__track {
+  background: var(--admin-color-primary);
+}
+
+.admin-switch input:checked + .admin-switch__track::after {
+  transform: translateX(20px);
+}
+
+.admin-switch input:focus-visible + .admin-switch__track {
+  outline: 2px solid var(--admin-color-focus);
+  outline-offset: 2px;
+}
+
+/* ----- 로그인 ----- */
+
+.admin-login {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: var(--admin-space-5);
+}
+
+.admin-login__card {
+  display: flex;
+  width: 100%;
+  max-width: 420px;
+  flex-direction: column;
+  gap: var(--admin-space-5);
+  padding: var(--admin-space-10);
+  border-radius: var(--admin-radius-lg);
+  background: var(--admin-color-surface);
+}
+
+.admin-login__title {
+  font-size: var(--admin-font-size-xl);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ----- 레이아웃 ----- */
+
+.admin-layout {
+  min-height: 100vh;
+  padding-left: var(--admin-sidebar-width);
+}
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: var(--admin-sidebar-width);
+  flex-direction: column;
+  padding: var(--admin-space-5) var(--admin-space-3);
+  border-right: 1px solid var(--admin-color-border);
+  background: var(--admin-color-surface);
+}
+
+.admin-sidebar__title {
+  padding: 0 var(--admin-space-2) var(--admin-space-4);
+  border-bottom: 1px solid var(--admin-color-border);
+  font-size: var(--admin-font-size-lg);
+  font-weight: 700;
+}
+
+.admin-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--admin-space-1);
+  margin-top: var(--admin-space-4);
+}
+
+.admin-sidebar__link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--admin-space-2) var(--admin-space-3);
+  border-radius: var(--admin-radius-lg);
+  font-size: var(--admin-font-size-md);
+  font-weight: 600;
+  transition: background-color var(--admin-transition);
+}
+
+.admin-sidebar__link:hover,
+.admin-sidebar__link.active {
+  background: var(--admin-color-hover);
+}
+
+.admin-sidebar__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--admin-space-3);
+  margin-top: auto;
+  padding: var(--admin-space-4) var(--admin-space-2) 0;
+  border-top: 1px solid var(--admin-color-border);
+}
+
+.admin-sidebar__user {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-sidebar__site {
+  font-size: var(--admin-font-size-sm);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* ----- 편집 페이지 ----- */
+
+.admin-page__header {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--admin-space-6);
+  padding: var(--admin-space-4) var(--admin-space-8);
+  border-bottom: 1px solid var(--admin-color-border);
+  background: var(--admin-color-surface);
+}
+
+.admin-page__title {
+  font-size: var(--admin-font-size-xl);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.admin-page__status {
+  margin-top: var(--admin-space-1);
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-sm);
+}
+
+.admin-page__actions {
+  display: flex;
+  gap: var(--admin-space-2);
+}
+
+.admin-page__error {
+  max-width: var(--admin-content-max-width);
+  margin: var(--admin-space-6) auto 0;
+  padding: 0 var(--admin-space-8);
+}
+
+.admin-page__body {
+  display: flex;
+  max-width: var(--admin-content-max-width);
+  flex-direction: column;
+  gap: var(--admin-space-6);
+  margin: 0 auto;
+  padding: var(--admin-space-8);
+}
+
+.admin-section {
+  padding: var(--admin-space-6);
+  border-radius: var(--admin-radius-lg);
+  background: var(--admin-color-surface);
+}
+
+.admin-section__header {
+  margin-bottom: var(--admin-space-5);
+  padding-bottom: var(--admin-space-4);
+  border-bottom: 1px solid var(--admin-color-border);
+}
+
+.admin-section__title {
+  font-size: var(--admin-font-size-lg);
+  font-weight: 700;
+}
+
+.admin-section__description {
+  margin-top: var(--admin-space-1);
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-sm);
+}
+
+.admin-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--admin-space-6);
+}
+
+.admin-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--admin-space-6);
+}
+
+.admin-subsection {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: var(--admin-space-4);
+  padding: var(--admin-space-5);
+  border: 1px solid var(--admin-color-border);
+  border-radius: var(--admin-radius-lg);
+}
+
+.admin-subsection__header {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--admin-space-3);
+}
+
+.admin-subsection__header > .admin-field {
+  width: 320px;
+}
+
+.admin-subsection__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--admin-space-2);
+}
+
+.admin-subsection__title {
+  flex: 1;
+  font-weight: 700;
+}
+
+.admin-subsection > .admin-field {
+  width: 100%;
+}
+
+/* ----- 목록 표 ----- */
+
+.admin-toolbar {
+  display: flex;
+  gap: var(--admin-space-2);
+}
+
+.admin-toolbar__search {
+  flex: 1;
+}
+
+.admin-toolbar__select {
+  width: 160px;
+}
+
+.admin-toolbar__hint {
+  margin: var(--admin-space-2) 0 var(--admin-space-4);
+}
+
+.admin-table,
+.admin-table__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-table__row {
+  display: grid;
+  grid-template-columns: var(--admin-table-columns);
+  align-items: center;
+  gap: var(--admin-space-3);
+  padding: var(--admin-space-2) 0;
+  border-bottom: 1px solid var(--admin-color-border);
+  background: var(--admin-color-surface);
+}
+
+.admin-table__row--head {
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-sm);
+  font-weight: 600;
+}
+
+.admin-table__thumb {
+  display: block;
+  width: 96px;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--admin-radius-sm);
+  background: var(--admin-color-subtle);
+  object-fit: cover;
+}
+
+.admin-table__thumb--portrait {
+  width: 48px;
+  aspect-ratio: 3 / 4;
+}
+
+.admin-table__title {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-table__title:hover {
+  text-decoration: underline;
+}
+
+.admin-table__muted {
+  overflow: hidden;
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-table__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--admin-space-1);
+}
+
+/* ----- 이미지 ----- */
+
+.admin-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--admin-space-2);
+}
+
+.admin-image-field {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--admin-space-4);
+}
+
+.admin-thumb {
+  display: block;
+  width: var(--admin-thumb-width);
+  aspect-ratio: 370 / 523;
+  border: 1px solid var(--admin-color-border);
+  border-radius: var(--admin-radius);
+  background: var(--admin-color-subtle);
+  object-fit: cover;
+}
+
+.admin-thumb--portrait {
+  aspect-ratio: 3 / 4;
+}
+
+.admin-thumb--landscape {
+  width: calc(var(--admin-thumb-width) * 1.6);
+  aspect-ratio: 3 / 2;
+}
+
+.admin-thumb--wide {
+  width: calc(var(--admin-thumb-width) * 2);
+  aspect-ratio: 845 / 562;
+}
+
+.admin-thumb--tall {
+  aspect-ratio: 410 / 563;
+}
+
+/* 사이트처럼 어두운 바탕에 흰 서명이 올라가므로 같은 바탕에 담는다. */
+.admin-thumb--signature {
+  width: calc(var(--admin-thumb-width) * 1.6);
+  aspect-ratio: 2 / 1;
+  padding: var(--admin-space-2);
+  background: #111111;
+  object-fit: contain;
+}
+
+.admin-thumb--card {
+  width: calc(var(--admin-thumb-width) * 1.6);
+  aspect-ratio: 1233 / 774;
+  object-fit: contain;
+}
+
+.admin-thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--admin-color-placeholder);
+  font-size: var(--admin-font-size-xs);
+  font-weight: 600;
+}
+
+.admin-image-field__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--admin-space-2);
+}
+
+.admin-gallery-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--admin-space-6);
+}
+
+/* 로고는 잘리지 않게 담고, 흰 로고도 보이도록 어두운 바탕에 둔다. */
+.admin-thumb--logo {
+  aspect-ratio: 16 / 9;
+  padding: var(--admin-space-3);
+  background: #111111;
+  object-fit: contain;
+}
+
+.admin-image-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(var(--admin-thumb-width), 1fr));
+  gap: var(--admin-space-4);
+}
+
+.admin-image-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--admin-space-2);
+}
+
+.admin-image-tile .admin-thumb {
+  width: 100%;
+}
+
+.admin-image-tile__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--admin-space-1);
+}
+
+.admin-image-tile__index {
+  flex: 1;
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-sm);
+  font-weight: 600;
+}
+
+/* ----- 정렬 목록 ----- */
+
+.admin-sortable {
+  position: relative;
+}
+
+.admin-sortable.is-dragging {
+  z-index: 1;
+  opacity: 0.85;
+}
+
+.admin-drag-handle {
+  display: inline-flex;
+  width: 28px;
+  height: 32px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--admin-radius-sm);
+  background: transparent;
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-md);
+  cursor: grab;
+  touch-action: none;
+}
+
+.admin-drag-handle:hover {
+  background: var(--admin-color-hover);
+}
+
+.admin-sortable.is-dragging .admin-drag-handle {
+  cursor: grabbing;
+}
+
+.admin-row-list {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: var(--admin-space-2);
+}
+
+.admin-row {
+  display: grid;
+  grid-template-columns: 28px repeat(var(--admin-row-columns), minmax(0, 1fr)) 56px;
+  align-items: center;
+  gap: var(--admin-space-2);
+}
+
+.admin-row--head {
+  color: var(--admin-color-muted);
+  font-size: var(--admin-font-size-sm);
+  font-weight: 600;
+}
+
+/* ----- 좁은 화면 ----- */
+
+.admin-mobile-notice {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .admin-root > :not(.admin-mobile-notice) {
+    display: none;
+  }
+
+  .admin-mobile-notice {
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: var(--admin-space-6);
+    font-size: var(--admin-font-size-md);
+    font-weight: 600;
+    text-align: center;
+  }
+}

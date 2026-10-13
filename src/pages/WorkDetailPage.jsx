@@ -1,35 +1,78 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import LanguageToggle from "../components/LanguageToggle";
 import WorksFilters from "../components/WorksFilters";
+import usePageContent from "../content/usePageContent";
+import {
+  getCachedWorks,
+  getRelatedWorks,
+  loadWorks,
+} from "../content/worksContent";
 import useIsMobile from "../hooks/useIsMobile";
 import projectArrow from "../assets/designer-work-arrow.png";
-import {
-  getWorkById,
-  workCategories,
-  workWorlds,
-} from "../data/works";
+import { workCategories, workWorlds } from "../data/works";
 import { scheduleReveal } from "../utils/loadingReveal";
+import { toVideoEmbedUrl } from "../utils/videoEmbed";
 import "../works.css";
 import "../work-detail.css";
 
-function GalleryImage({ image }) {
+function GalleryImage({ image, alt }) {
   return (
     <div className="work-detail-gallery-image">
-      {image.src ? <img src={image.src} alt={image.alt} /> : null}
+      {image ? <img src={image.src} alt={alt} /> : null}
+    </div>
+  );
+}
+
+function GalleryRow({ row, title }) {
+  if (row.layout === "video") {
+    const embedUrl = toVideoEmbedUrl(row.videoUrl);
+    if (!embedUrl) return null;
+
+    return (
+      <div
+        className="work-detail-gallery-row work-detail-gallery-row--video"
+        data-work-detail-reveal
+      >
+        <iframe
+          className="work-detail-gallery-video"
+          src={embedUrl}
+          title={`${title} 영상`}
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`work-detail-gallery-row work-detail-gallery-row--${row.layout}`}
+      data-work-detail-reveal
+    >
+      {row.images.map((image, index) => (
+        <GalleryImage image={image} alt={`${title} 상세 이미지`} key={image?.id ?? index} />
+      ))}
     </div>
   );
 }
 
 function WorkDetailPage() {
+  const works = usePageContent(getCachedWorks, loadWorks);
+  if (!works) return <main className="work-detail-page" />;
+  return <WorkDetailContent works={works} />;
+}
+
+function WorkDetailContent({ works }) {
   const pageRef = useRef(null);
   const isMobile = useIsMobile();
   const [language, setLanguage] = useState("ko");
   const navigate = useNavigate();
   const { workId } = useParams();
-  const work = getWorkById(workId);
+  const work = works.find((item) => item.id === workId);
 
   useEffect(() => {
     const page = pageRef.current;
@@ -63,6 +106,7 @@ function WorkDetailPage() {
 
   if (!work) return <Navigate to="/works" replace />;
 
+  const relatedWorks = getRelatedWorks(works, work);
   const goToFilteredWorks = (key, value) => {
     const params = new URLSearchParams();
     if (value !== "all") params.set(key, value);
@@ -92,11 +136,16 @@ function WorkDetailPage() {
               <div className="work-detail-heading" data-work-detail-reveal>
                 <div>
                   <h1>{work.title}</h1>
-                  <p>{work.detail.categoryLabel}</p>
+                  <p>{work.categoryLabel}</p>
                 </div>
-                <Link to={`/designers/${work.designer.id}`}>
-                  {work.designer.name}
-                </Link>
+                <span className="work-detail-designers">
+                  {work.designers.map((designer, index) => (
+                    <Fragment key={designer.id}>
+                      {index > 0 ? ", " : null}
+                      <Link to={`/designers/${designer.id}`}>{designer.name}</Link>
+                    </Fragment>
+                  ))}
+                </span>
               </div>
 
               <div
@@ -105,11 +154,7 @@ function WorkDetailPage() {
               >
                 {isMobile ? (
                   <>
-                    <p>
-                      {language === "ko"
-                        ? work.detail.descriptionKo
-                        : work.detail.descriptionEn}
-                    </p>
+                    <p>{work.description[language]}</p>
                     <LanguageToggle
                       language={language}
                       onToggle={() =>
@@ -121,53 +166,47 @@ function WorkDetailPage() {
                   </>
                 ) : (
                   <>
-                    <p>{work.detail.descriptionKo}</p>
-                    <p>{work.detail.descriptionEn}</p>
+                    <p>{work.description.ko}</p>
+                    <p>{work.description.en}</p>
                   </>
                 )}
               </div>
 
-              <div
-                className="work-detail-related"
-                data-work-detail-reveal
-              >
-                {work.detail.relatedProjects.map((project) => (
-                  <Link
-                    className="related-project"
-                    to={`/works/${project.workId}`}
-                    key={project.id}
-                  >
-                    <div className="related-project__thumbnail">
-                      {project.thumbnail ? (
-                        <img src={project.thumbnail} alt={project.title} />
-                      ) : null}
-                      <img
-                        className="related-project__arrow"
-                        src={projectArrow}
-                        alt=""
-                      />
-                    </div>
-                    <div>
-                      <h2>{project.title}</h2>
-                      <p>{project.categoryLabel}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+              {relatedWorks.length > 0 ? (
+                <div
+                  className="work-detail-related"
+                  data-work-detail-reveal
+                >
+                  {relatedWorks.map((project) => (
+                    <Link
+                      className="related-project"
+                      to={`/works/${project.id}`}
+                      key={project.id}
+                    >
+                      <div className="related-project__thumbnail">
+                        {project.thumbnail ? (
+                          <img src={project.thumbnail.src} alt={project.title} />
+                        ) : null}
+                        <img
+                          className="related-project__arrow"
+                          src={projectArrow}
+                          alt=""
+                        />
+                      </div>
+                      <div>
+                        <h2>{project.title}</h2>
+                        <p>{project.categoryLabel}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </aside>
 
           <div className="work-detail-gallery">
-            {work.detail.gallery.map((row) => (
-              <div
-                className={`work-detail-gallery-row work-detail-gallery-row--${row.layout}`}
-                data-work-detail-reveal
-                key={row.id}
-              >
-                {row.images.map((image) => (
-                  <GalleryImage image={image} key={image.alt} />
-                ))}
-              </div>
+            {work.gallery.map((row) => (
+              <GalleryRow row={row} title={work.title} key={row.id} />
             ))}
           </div>
         </section>

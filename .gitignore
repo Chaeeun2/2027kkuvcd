@@ -3,3 +3,7 @@ dist/
 .firebase/
 firebase-debug.log*
 .DS_Store
+.env.local
+.env.*.local
+.dev.vars
+.wrangler/

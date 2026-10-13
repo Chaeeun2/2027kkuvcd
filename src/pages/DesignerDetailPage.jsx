@@ -2,14 +2,17 @@ import { useEffect, useRef } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import MultilineText from "../components/MultilineText";
 import designerLine from "../assets/designer-line.png";
 import projectArrow from "../assets/designer-work-arrow.png";
+import { formatEnglishName } from "../data/designers";
+import { getCachedDesigners, loadDesigners } from "../content/designersContent";
+import usePageContent from "../content/usePageContent";
 import {
-  formatEnglishName,
-  getDesignerById,
-  getDesignerDetail,
-} from "../data/designers";
-import { getWorksByDesignerId } from "../data/designerWorks";
+  getCachedWorks,
+  getWorksByDesignerId,
+  loadWorks,
+} from "../content/worksContent";
 import useIsMobile from "../hooks/useIsMobile";
 import { scheduleReveal } from "../utils/loadingReveal";
 import "../designer-detail.css";
@@ -64,27 +67,33 @@ function useDetailReveal() {
 }
 
 function DesignerDetailPage() {
+  const designers = usePageContent(getCachedDesigners, loadDesigners);
+  const works = usePageContent(getCachedWorks, loadWorks);
+  if (!designers || !works) return <main className="designer-detail-page" />;
+  return <DesignerDetailContent designers={designers} works={works} />;
+}
+
+function DesignerDetailContent({ designers, works }) {
   const pageRef = useDetailReveal();
   const isMobile = useIsMobile();
   const { designerId } = useParams();
-  const designer = getDesignerById(designerId);
+  const designer = designers.find((item) => item.id === designerId);
 
   if (!designer) return <Navigate to="/designers" replace />;
 
-  const detail = getDesignerDetail(designer);
-  const assignedWorks = getWorksByDesignerId(designer.id);
+  const assignedWorks = getWorksByDesignerId(works, designer.id);
   const projects = assignedWorks.length
     ? assignedWorks.map((work) => ({
         id: work.id,
         title: work.title,
-        category: work.detail.categoryLabel,
-        image: work.thumbnail,
+        category: work.categoryLabel,
+        image: work.thumbnail?.src,
       }))
     : emptyProjects;
   const displayKoreanName = designer.koreanName;
   const displayEnglishName = formatEnglishName(designer.englishName);
   // 모바일 시안은 세로 프로필 사진 대신 가로 아이디카드 뒷면을 머리에 둔다.
-  const headerImage = isMobile ? designer.backImage : detail.profileImage;
+  const headerImage = isMobile ? designer.backImage : designer.profileImage;
 
   return (
     <main className="designer-detail-page" ref={pageRef}>
@@ -127,8 +136,8 @@ function DesignerDetailPage() {
                     <div>
                       <dt>Email</dt>
                       <dd>
-                        {detail.email ? (
-                          <a href={`mailto:${detail.email}`}>{detail.email}</a>
+                        {designer.email ? (
+                          <a href={`mailto:${designer.email}`}>{designer.email}</a>
                         ) : (
                           "준비 중"
                         )}
@@ -136,14 +145,14 @@ function DesignerDetailPage() {
                     </div>
                     <div>
                       <dt>Instagram</dt>
-                      <dd>{detail.instagram ?? "준비 중"}</dd>
+                      <dd>{designer.instagram || "준비 중"}</dd>
                     </div>
                   </dl>
                 </div>
 
                 <div className="designer-detail-signature">
-                  {detail.signatureImage && (
-                    <img src={detail.signatureImage} alt="" />
+                  {designer.signatureImage && (
+                    <img src={designer.signatureImage} alt="" />
                   )}
                 </div>
               </div>
@@ -155,8 +164,7 @@ function DesignerDetailPage() {
             >
               <SectionHeading>Statement</SectionHeading>
               <p>
-                {detail.statement ??
-                  "디자이너 소개가 준비 중입니다. designers.js에서 정보를 추가할 수 있습니다."}
+                <MultilineText text={designer.statement || "디자이너 소개가 준비 중입니다."} />
               </p>
             </section>
 

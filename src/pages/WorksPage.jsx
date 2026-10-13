@@ -5,7 +5,9 @@ import Header from "../components/Header";
 import LanguageToggle from "../components/LanguageToggle";
 import WorkCard from "../components/WorkCard";
 import WorksFilters from "../components/WorksFilters";
-import { workCategories, works, workWorlds } from "../data/works";
+import usePageContent from "../content/usePageContent";
+import { getCachedWorks, loadWorks } from "../content/worksContent";
+import { workCategories, workWorlds } from "../data/works";
 import useIsMobile from "../hooks/useIsMobile";
 import { scheduleReveal } from "../utils/loadingReveal";
 import "../works.css";
@@ -43,6 +45,12 @@ function WorkGrid({ items, threeColumns = false }) {
 }
 
 function WorksPage() {
+  const works = usePageContent(getCachedWorks, loadWorks);
+  if (!works) return <main className="works-page" />;
+  return <WorksPageContent works={works} />;
+}
+
+function WorksPageContent({ works }) {
   const pageRef = useRef(null);
   const isMobile = useIsMobile();
   const [language, setLanguage] = useState("ko");
@@ -63,7 +71,7 @@ function WorksPage() {
           (category === "all" || work.categoryIds.includes(category)) &&
           (world === "all" || work.worldType === world),
       ),
-    [category, world],
+    [category, world, works],
   );
   const selectedWorld = workWorlds.find((item) => item.id === world);
   const updateFilter = (key, value) => {

@@ -2,90 +2,31 @@ import { useEffect, useRef, useState } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import LanguageToggle from "../components/LanguageToggle";
+import MultilineText from "../components/MultilineText";
+import {
+  getCachedAboutContent,
+  loadAboutContent,
+} from "../content/aboutContent";
+import { resolveImageSrc } from "../content/defaultAssets";
+import usePageContent from "../content/usePageContent";
 import useIsMobile from "../hooks/useIsMobile";
 import aboutBg from "../assets/about_bg.jpg";
 import introBg1 from "../assets/about-section1-bg01.jpg";
 import introBg2 from "../assets/about-section1-bg02.jpg";
 import introBg3 from "../assets/about-section1-bg03.jpg";
 import introBg4 from "../assets/about-section1-bg04.jpg";
-import introImage from "../assets/about-main-img.jpg";
 import infoCard from "../assets/about-section2-img.png";
-import gallery1 from "../assets/about-section3-img1.jpg";
-import gallery2 from "../assets/about-section3-img2.jpg";
-import gallery3 from "../assets/about-section3-img3.jpg";
-import gallery4 from "../assets/about-section3-img4.jpg";
-import gallery5 from "../assets/about-section3-img5.jpg";
 import contributorBox from "../assets/about-section4-img.png";
 import facultyGraphic from "../assets/about-section5-img.jpg";
-import support1 from "../assets/about-section5-img1.png";
-import support2 from "../assets/about-section5-img2.png";
-import support3 from "../assets/about-section5-img3.png";
 import lineImage from "../assets/line.png";
 import { scheduleReveal } from "../utils/loadingReveal";
 import "../about.css";
 
 const introBackgrounds = [introBg1, introBg2, introBg3, introBg4];
-const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5];
 
-const aboutCopy = {
-  ko: {
-    subtitle: (
-      <>
-        2027 건국대학교 디자인대학교
-        <br />
-        시각영상디자인학과 시각트랙
-        <br />
-        졸업전시회
-      </>
-    ),
-    body: "이번 졸업 전시 ‘HELLO WORLD’는 지난 4년간 우리가 치열하게 고민하며 쌓아온 시간과 경험이 학교라는 훈련장을 떠나 비로소 사회라는 수취인에게 전달되는 첫 번째 인사를 의미합니다. 우리가 보낸 시간은 각자의 가치를 담아 정성껏 포장되어 달려온 기나긴 운송의 과정이며, 이번 전시장은 그 여정이 마침내 세상과 마주하는 도착지이자 상자를 열고 더 넓은 세계로 나아가는 새로운 여정의 시작점입니다. 즉, 전시는 단순히 4년의 마침표를 찍는 결과보고가 아니라, 우리의 작품이라는 상자가 사람들에게 전달되어 새로운 이야기가 시작되는 설레는 첫 만남입니다.",
-    hoursLabel: "시간",
-    hours: (
-      <>
-        Fri-Sun 10:00 - 18:00
-        <br />
-        Mon 10:00 - 17:00
-      </>
-    ),
-    venueLabel: "장소",
-    venue: (
-      <>
-        서울특별시 종로구 대학로 57
-        <br />
-        홍익대학교 대학로 아트센터
-        <br />
-        B2 제 3전시장
-      </>
-    ),
-  },
-  en: {
-    subtitle: (
-      <>
-        2027 Konkuk University Visual Communication &amp; Media Design
-        <br />
-        Graduation Exhibition
-      </>
-    ),
-    body: "‘HELLO WORLD’ marks our first greeting to the world, as four years of ideas and experiences leave the training ground of school and are finally delivered to society. Our time together has been a long journey, carefully packed with our own values. This exhibition is both its destination and a new starting point, where we open the box and step into a wider world. More than the end of four years, it is our first encounter with the world—the moment our work is delivered and a new story begins.",
-    hoursLabel: "Hours",
-    hours: (
-      <>
-        Fri-Sun 10:00 - 18:00
-        <br />
-        Mon 10:00 - 17:00
-      </>
-    ),
-    venueLabel: "Venue",
-    venue: (
-      <>
-        7, Daehak-ro, Jongno-gu,
-        <br />
-        Seoul, Republic of Korea,
-        <br />
-        B2 Exhibition Hall 3
-      </>
-    ),
-  },
+const factLabels = {
+  ko: { hours: "시간", venue: "장소" },
+  en: { hours: "Hours", venue: "Venue" },
 };
 
 function useScrollReveal() {
@@ -228,8 +169,10 @@ function IntroBackground() {
   );
 }
 
-function PhotoStrip({ isMobile }) {
-  const images = isMobile ? galleryImages.slice(0, 3) : galleryImages;
+function PhotoStrip({ gallery, isMobile }) {
+  const images = (isMobile ? gallery.slice(0, 3) : gallery).map((item) =>
+    resolveImageSrc(item.src),
+  );
   const repeatedImages = isMobile ? images : [...images, ...images];
 
   return (
@@ -247,11 +190,25 @@ function PhotoStrip({ isMobile }) {
   );
 }
 
+/* 콘텐츠가 오기 전에는 빈 페이지를 두고, 로딩 화면이 그동안 화면을 덮는다. */
 function AboutPage() {
+  const content = usePageContent(getCachedAboutContent, loadAboutContent);
+
+  if (!content) return <main className="about-page" />;
+
+  return <AboutPageContent content={content} />;
+}
+
+function AboutPageContent({ content }) {
   const pageRef = useScrollReveal();
   const isMobile = useIsMobile();
   const [language, setLanguage] = useState("ko");
-  const copy = aboutCopy[language];
+  const labels = factLabels[language];
+  const committeeSplit = Math.ceil(content.committee.length / 2);
+  const committeeColumns = [
+    content.committee.slice(0, committeeSplit),
+    content.committee.slice(committeeSplit),
+  ];
 
   return (
     <main className="about-page" ref={pageRef}>
@@ -265,7 +222,7 @@ function AboutPage() {
         <section className="about-intro">
           <img
             className="about-intro-image"
-            src={introImage}
+            src={resolveImageSrc(content.introImage.src)}
             alt=""
             data-reveal
           />
@@ -273,23 +230,23 @@ function AboutPage() {
             <div>
               <h1 data-reveal>HELLO WORLD</h1>
               <h2 data-reveal data-reveal-delay="80">
-                {isMobile
-                  ? copy.subtitle
-                  : aboutCopy.en.subtitle}
+                <MultilineText
+                  text={content.subtitle[isMobile ? language : "en"]}
+                />
               </h2>
             </div>
             <div className="about-intro-description">
               {isMobile ? (
                 <p data-reveal data-reveal-delay="160">
-                  {copy.body}
+                  {content.body[language]}
                 </p>
               ) : (
                 <>
                   <p data-reveal data-reveal-delay="160">
-                    {aboutCopy.ko.body}
+                    {content.body.ko}
                   </p>
                   <p data-reveal data-reveal-delay="240">
-                    {aboutCopy.en.body}
+                    {content.body.en}
                   </p>
                 </>
               )}
@@ -304,13 +261,13 @@ function AboutPage() {
             ) : null}
             <a
               className="about-instagram"
-              href="https://www.instagram.com/2027kkuvcd"
+              href={content.instagram.url}
               target="_blank"
               rel="noreferrer"
               data-reveal
               data-reveal-delay="320"
             >
-              @2027kkuvcd
+              {content.instagram.label}
             </a>
           </div>
         </section>
@@ -326,7 +283,7 @@ function AboutPage() {
             data-section-two-item
           >
             <img src={lineImage} alt="" />
-            <p>2026.10.30-11.02</p>
+            <p>{content.date}</p>
           </div>
 
           <div
@@ -340,51 +297,37 @@ function AboutPage() {
             <div className="about-info-card-content">
               <div className="about-info-titles">
                 <h2>
-                  2027 건국대학교 디자인대학
-                  <br />
-                  시각영상디자인학과 시각트랙
-                  <br />
-                  졸업전시회
+                  <MultilineText text={content.exhibitionTitle.ko} />
                 </h2>
                 <p>
-                  2027 Konkuk University
-                  <br />
-                  Visual Communication &amp; Media Design
-                  <br />
-                  (Track VCD) Graduation Exhibition
+                  <MultilineText text={content.exhibitionTitle.en} />
                 </p>
               </div>
               {isMobile ? (
                 <dl className="about-info-facts">
                   <div className="about-info-fact">
-                    <dt>{copy.hoursLabel}</dt>
-                    <dd>{copy.hours}</dd>
+                    <dt>{labels.hours}</dt>
+                    <dd>
+                      <MultilineText text={content.hours} />
+                    </dd>
                   </div>
                   <div className="about-info-fact">
-                    <dt>{copy.venueLabel}</dt>
-                    <dd>{copy.venue}</dd>
+                    <dt>{labels.venue}</dt>
+                    <dd>
+                      <MultilineText text={content.venue[language]} />
+                    </dd>
                   </div>
                 </dl>
               ) : (
                 <div>
                   <strong>
-                    Fri–Sun 10:00–18:00
-                    <br />
-                    Mon 10:00–17:00
+                    <MultilineText text={content.hours} />
                   </strong>
                   <strong>
-                    서울특별시 종로구 대학로 57
-                    <br />
-                    홍익대학교 대학로 아트센터
-                    <br />
-                    B2 제3전시장
+                    <MultilineText text={content.venue.ko} />
                   </strong>
                   <p>
-                    7, Daehak-ro, Jongno-gu,
-                    <br />
-                    Seoul, Republic of Korea,
-                    <br />
-                    B2 Exhibition Hall 3
+                    <MultilineText text={content.venue.en} />
                   </p>
                 </div>
               )}
@@ -392,25 +335,27 @@ function AboutPage() {
           </div>
         </section>
 
-        <PhotoStrip isMobile={isMobile} />
+        <PhotoStrip gallery={content.gallery} isMobile={isMobile} />
 
         <section className="about-contributors">
           <h2 data-reveal>CONTRIBUTORS</h2>
           <div className="about-contributors-content">
             <h3 data-reveal>졸업준비위원회</h3>
             <div className="about-contributor-columns">
-              <dl>
-                <div data-reveal><dt>위원장</dt><dd>이청경</dd></div>
-                <div data-reveal data-reveal-delay="60"><dt>부위원장</dt><dd>김서영</dd></div>
-                <div data-reveal data-reveal-delay="120"><dt>총무</dt><dd>이승민</dd></div>
-                <div data-reveal data-reveal-delay="180"><dt>기획</dt><dd>고서연 최예은</dd></div>
-              </dl>
-              <dl>
-                <div data-reveal><dt>디자인</dt><dd>김현준 이은빈</dd></div>
-                <div data-reveal data-reveal-delay="60"><dt>도록</dt><dd>이청경</dd></div>
-                <div data-reveal data-reveal-delay="120"><dt>웹</dt><dd>이승민 이청경</dd></div>
-                <div data-reveal data-reveal-delay="180"><dt>홍보</dt><dd>김서영</dd></div>
-              </dl>
+              {committeeColumns.map((members, columnIndex) => (
+                <dl key={columnIndex}>
+                  {members.map((member, index) => (
+                    <div
+                      key={member.id}
+                      data-reveal
+                      data-reveal-delay={index * 60}
+                    >
+                      <dt>{member.role}</dt>
+                      <dd>{member.name}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ))}
             </div>
           </div>
           <img
@@ -438,24 +383,13 @@ function AboutPage() {
           <div className="about-faculty-content">
             <h2 data-reveal>작품지도 교수님</h2>
             <div className="about-faculty-tracks">
-              <FacultyTrack
-                title="시각트랙"
-                courses={[
-                  ["프로모션디자인", "박지은 교수님"],
-                  ["전공연구프로젝트(시각)", "김주연 교수님"],
-                  ["정보디자인프로젝트", "박지은 교수님"],
-                  ["실험디자인", "김주경 교수님"],
-                ]}
-              />
-              <FacultyTrack
-                title="영상·디지털트랙"
-                courses={[
-                  ["UIUX캡스톤디자인", "정혜경 교수님"],
-                  ["전공연구프로젝트(영상)", "박상권 교수님"],
-                  ["전공연구프로젝트(디지털)", "강일 교수님"],
-                  ["뉴미디어영상", "고이관 교수님"],
-                ]}
-              />
+              {content.faculty.map((track) => (
+                <FacultyTrack
+                  key={track.id}
+                  title={track.title}
+                  courses={track.courses}
+                />
+              ))}
             </div>
           </div>
         </section>
@@ -467,9 +401,15 @@ function AboutPage() {
         <section className="about-supports">
           <h2 data-reveal>SUPPORTS</h2>
           <div>
-            <img src={support1} alt="" data-reveal />
-            <img src={support2} alt="" data-reveal data-reveal-delay="80" />
-            <img src={support3} alt="" data-reveal data-reveal-delay="160" />
+            {content.supports.map((logo, index) => (
+              <img
+                key={logo.id}
+                src={resolveImageSrc(logo.src)}
+                alt=""
+                data-reveal
+                data-reveal-delay={index * 80}
+              />
+            ))}
           </div>
         </section>
       </div>
@@ -484,14 +424,14 @@ function FacultyTrack({ courses, title }) {
     <div className="about-faculty-track">
       <h3 data-reveal>{title}</h3>
       <dl>
-        {courses.map(([course, professor], index) => (
+        {courses.map((item, index) => (
           <div
-            key={course}
+            key={item.id}
             data-reveal
             data-reveal-delay={index * 60}
           >
-            <dt>{course}</dt>
-            <dd>{professor}</dd>
+            <dt>{item.course}</dt>
+            <dd>{item.professor}</dd>
           </div>
         ))}
       </dl>

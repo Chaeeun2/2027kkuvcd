@@ -57,15 +57,21 @@
   line-height: 1;
 }
 
-.work-detail-heading > a {
+.work-detail-designers {
+  flex: none;
+  max-width: 50%;
   font-size: var(--font-size-body);
   font-weight: 800;
   line-height: 1;
+  text-align: right;
+}
+
+.work-detail-designers a {
   transition: color 180ms ease;
 }
 
-.work-detail-heading > a:hover,
-.work-detail-heading > a:focus-visible {
+.work-detail-designers a:hover,
+.work-detail-designers a:focus-visible {
   color: var(--color-brand);
 }
 
@@ -199,6 +205,14 @@
   aspect-ratio: 410 / 563;
 }
 
+.work-detail-gallery-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  background: var(--work-detail-placeholder);
+}
+
 .work-detail-gallery-image {
   overflow: hidden;
   background: var(--work-detail-placeholder);
@@ -289,7 +303,7 @@
     font-size: var(--font-size-project-category);
   }
 
-  .work-detail-heading > a {
+  .work-detail-designers {
     font-weight: 500;
   }
 
