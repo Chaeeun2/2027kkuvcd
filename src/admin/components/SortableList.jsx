@@ -16,7 +16,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-function SortableItem({ children, id }) {
+/* wholeItem이면 손잡이 없이 항목 전체를 잡고 끈다. */
+function SortableItem({ children, id, wholeItem }) {
   const {
     attributes,
     isDragging,
@@ -42,17 +43,25 @@ function SortableItem({ children, id }) {
 
   return (
     <div
-      className={`admin-sortable${isDragging ? " is-dragging" : ""}`}
+      className={`admin-sortable${wholeItem ? " admin-sortable--whole" : ""}${isDragging ? " is-dragging" : ""}`}
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
+      {...(wholeItem ? { ...attributes, ...listeners } : {})}
     >
-      {children(handle)}
+      {children(wholeItem ? null : handle)}
     </div>
   );
 }
 
 /* items는 고유한 id를 가진 배열이다. renderItem(item, index, handle)로 항목을 그린다. */
-function SortableList({ className, items, layout = "list", onChange, renderItem }) {
+function SortableList({
+  className,
+  items,
+  layout = "list",
+  onChange,
+  renderItem,
+  wholeItem = false,
+}) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, {
@@ -81,7 +90,7 @@ function SortableList({ className, items, layout = "list", onChange, renderItem 
       >
         <div className={className}>
           {items.map((item, index) => (
-            <SortableItem id={item.id} key={item.id}>
+            <SortableItem id={item.id} key={item.id} wholeItem={wholeItem}>
               {(handle) => renderItem(item, index, handle)}
             </SortableItem>
           ))}

@@ -1,10 +1,12 @@
-import blueCardFront from "../assets/idcard1-front.png";
-import grayCardFront from "../assets/idcard2-front.png";
+import { assetUrl } from "./assetUrl";
 import { DEFAULT_CARD_BACK, defaultDesigners } from "../data/designers";
 import createCachedLoader from "./cachedLoader";
 import { resolveImageSrc } from "./defaultAssets";
 import { queryFirestoreCollection } from "./firestoreRest";
 import { image, text } from "./normalize";
+
+const blueCardFront = assetUrl("idcard1-front.png");
+const grayCardFront = assetUrl("idcard2-front.png");
 
 export const DESIGNERS_COLLECTION = "designers";
 

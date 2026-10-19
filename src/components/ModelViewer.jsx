@@ -3,15 +3,19 @@ import { Canvas, useLoader, useThree } from "@react-three/fiber";
 import { PresentationControls } from "@react-three/drei";
 import { MathUtils, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import defaultModelUrl from "../assets/helloworld_Box_Web exact.glb?url";
+import { assetUrl } from "../content/assetUrl";
+
+const defaultModelUrl = assetUrl("helloworld_Box_Web exact.glb");
 
 const DESIGN_WIDTH = 1440;
 const DESIGN_HEIGHT = 900;
 const MODEL_RADIUS = 1.8;
 const FIT_MARGIN = 1.23;
+// 데스크톱에서 상자가 화면에 보이는 크기 배율. 화면상 크기는 카메라 거리에 반비례한다.
+const DESKTOP_MODEL_SCALE = 0.8;
 const MOBILE_BREAKPOINT = 768;
 // 모바일 시안은 상자가 화면 폭보다 조금 넓게 잘려 나간다.
-const MOBILE_FIT_MARGIN = 1.18;
+const MOBILE_FIT_MARGIN = 1.24;
 // 시안의 상자는 화면 중앙보다 조금 아래에 놓인다.
 const MOBILE_LOOK_AT_Y = 0.33;
 
@@ -62,7 +66,9 @@ function CameraSetup() {
         size.height / DESIGN_HEIGHT,
       );
       distance =
-        (designDistance * (size.height / DESIGN_HEIGHT)) / viewportScale;
+        (designDistance * (size.height / DESIGN_HEIGHT)) /
+        viewportScale /
+        DESKTOP_MODEL_SCALE;
     }
 
     camera.aspect = aspect;

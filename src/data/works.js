@@ -52,23 +52,14 @@ export const categoryLabels = {
   experiment: "실험",
 };
 
-export const GALLERY_LAYOUTS = {
-  wide: { label: "한 장", imageCount: 1 },
-  split: { label: "두 장", imageCount: 2 },
-  video: { label: "영상", imageCount: 0 },
-};
-
 const categoryIds = Object.keys(categoryLabels);
 const worldIds = workWorlds.slice(1).map((world) => world.id);
 
-const placeholderGallery = ["wide", "split", "wide", "wide", "wide"].map(
-  (layout, index) => ({
-    id: `gallery-${index + 1}`,
-    layout,
-    images: Array(GALLERY_LAYOUTS[layout].imageCount).fill(null),
-    videoUrl: "",
-  }),
-);
+/* 이미지가 없는 자리표시 칸. src가 없으면 상세 페이지에 빈 상자로 보인다. */
+const placeholderGallery = [1, 2, 3, 4].map((number) => ({
+  id: `gallery-${number}`,
+  src: null,
+}));
 
 /* 관리자 화면에서 공개한 작품이 하나도 없을 때 보여 주는 자리표시 작품 */
 export const placeholderWorks = defaultDesigners.flatMap((designer, designerIndex) =>

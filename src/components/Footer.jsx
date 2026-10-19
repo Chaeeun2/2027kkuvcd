@@ -1,4 +1,6 @@
-import logoBlackUrl from "../assets/logo-black.png";
+import { assetUrl } from "../content/assetUrl";
+
+const logoBlackUrl = assetUrl("logo-black.png");
 
 function Footer({ reveal = false }) {
   const revealProps = reveal ? { "data-reveal": true } : {};

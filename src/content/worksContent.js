@@ -1,14 +1,9 @@
 import { defaultDesigners } from "../data/designers";
-import {
-  categoryLabels,
-  GALLERY_LAYOUTS,
-  placeholderWorks,
-  workWorlds,
-} from "../data/works";
+import { categoryLabels, placeholderWorks, workWorlds } from "../data/works";
 import createCachedLoader from "./cachedLoader";
 import { loadDesigners } from "./designersContent";
 import { queryFirestoreCollection } from "./firestoreRest";
-import { bilingual, image, isText, list, text } from "./normalize";
+import { bilingual, image, isText, text } from "./normalize";
 
 export const WORKS_COLLECTION = "works";
 
@@ -18,19 +13,13 @@ const worldIds = new Set(workWorlds.slice(1).map((world) => world.id));
 const knownIds = (value, known) =>
   Array.isArray(value) ? value.filter((id) => known.has(id)) : [];
 
-function normalizeGalleryRow(row, index) {
-  const layout = GALLERY_LAYOUTS[row?.layout] ? row.layout : "wide";
-  const images = Array.isArray(row?.images) ? row.images : [];
-
-  return {
-    id: text(row?.id, `gallery-${index}`),
-    layout,
-    images: Array.from(
-      { length: GALLERY_LAYOUTS[layout].imageCount },
-      (_, imageIndex) => image(images[imageIndex]),
-    ),
-    videoUrl: text(row?.videoUrl, ""),
-  };
+/* 예전 문서는 { layout, images } 줄 단위라 줄 안의 이미지를 순서대로 펼친다. */
+function normalizeGallery(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .flatMap((item) => (Array.isArray(item?.images) ? item.images : [item]))
+    .map(image)
+    .filter(Boolean);
 }
 
 /* 관리자 화면과 사이트가 같이 쓰는 작품 한 개의 저장 형태 */
@@ -42,7 +31,7 @@ export function normalizeWork(data) {
     categoryIds: knownIds(data?.categoryIds, categoryIds),
     worldType: worldIds.has(data?.worldType) ? data.worldType : "",
     description: bilingual(data?.description, { ko: "", en: "" }),
-    gallery: list(data?.gallery, normalizeGalleryRow, []),
+    gallery: normalizeGallery(data?.gallery),
     order: Number.isFinite(data?.order) ? data.order : Date.now(),
     published: data?.published === true,
   };

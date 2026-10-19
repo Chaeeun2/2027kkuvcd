@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import LanguageToggle from "../components/LanguageToggle";
 import WorkCard from "../components/WorkCard";
 import WorksFilters from "../components/WorksFilters";
+import { getCachedAboutContent, loadAboutContent } from "../content/aboutContent";
 import usePageContent from "../content/usePageContent";
 import { getCachedWorks, loadWorks } from "../content/worksContent";
 import { workCategories, workWorlds } from "../data/works";
@@ -13,6 +14,15 @@ import { scheduleReveal } from "../utils/loadingReveal";
 import "../works.css";
 
 const CARD_REVEAL_STEP = 80;
+
+const getCachedWorksPage = () => {
+  const works = getCachedWorks();
+  const about = getCachedAboutContent();
+  return works && about ? { works, about } : null;
+};
+
+const loadWorksPage = () =>
+  Promise.all([loadWorks(), loadAboutContent()]).then(([works, about]) => ({ works, about }));
 
 /* 한 줄 안에서 왼쪽 카드부터 차례로 들어오도록 화면에 실제로 놓인 열 순서를 쓴다. */
 function getWorkRevealDelay(element) {
@@ -45,12 +55,12 @@ function WorkGrid({ items, threeColumns = false }) {
 }
 
 function WorksPage() {
-  const works = usePageContent(getCachedWorks, loadWorks);
-  if (!works) return <main className="works-page" />;
-  return <WorksPageContent works={works} />;
+  const content = usePageContent(getCachedWorksPage, loadWorksPage);
+  if (!content) return <main className="works-page" />;
+  return <WorksPageContent works={content.works} descriptions={content.about.worldDescriptions} />;
 }
 
-function WorksPageContent({ works }) {
+function WorksPageContent({ descriptions, works }) {
   const pageRef = useRef(null);
   const isMobile = useIsMobile();
   const [language, setLanguage] = useState("ko");
@@ -74,6 +84,7 @@ function WorksPageContent({ works }) {
     [category, world, works],
   );
   const selectedWorld = workWorlds.find((item) => item.id === world);
+  const description = descriptions[world];
   const updateFilter = (key, value) => {
     const nextParams = new URLSearchParams(searchParams);
     if (value === "all") nextParams.delete(key);
@@ -143,8 +154,8 @@ function WorksPageContent({ works }) {
                   <>
                     <p>
                       {language === "ko"
-                        ? selectedWorld.descriptionKo
-                        : selectedWorld.descriptionEn}
+                        ? description.ko
+                        : description.en}
                     </p>
                     <LanguageToggle
                       language={language}
@@ -157,8 +168,8 @@ function WorksPageContent({ works }) {
                   </>
                 ) : (
                   <>
-                    <p>{selectedWorld.descriptionKo}</p>
-                    <p>{selectedWorld.descriptionEn}</p>
+                    <p>{description.ko}</p>
+                    <p>{description.en}</p>
                   </>
                 )}
               </aside>

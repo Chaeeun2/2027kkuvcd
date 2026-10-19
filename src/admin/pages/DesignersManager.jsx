@@ -8,7 +8,11 @@ import PageHeader from "../components/PageHeader";
 import SortableList from "../components/SortableList";
 import useCollection from "../hooks/useCollection";
 import useDesigners from "../hooks/useDesigners";
-import { createDocuments, deleteDocument, saveOrder } from "../services/documents";
+import {
+  createDocuments,
+  deleteDocument,
+  saveOrder,
+} from "../services/documents";
 import { collectMediaKeys, deleteImages } from "../services/media";
 
 const TABLE_COLUMNS = "28px 60px minmax(0, 1fr) minmax(0, 1.4fr) 72px 128px";
@@ -26,13 +30,19 @@ function DesignerRow({ designer, handle, onDelete, workCount }) {
       ) : (
         <span className="admin-table__thumb admin-table__thumb--portrait admin-thumb--empty" />
       )}
-      <Link className="admin-table__title" to={`/admin/designers/${designer.id}`}>
+      <Link
+        className="admin-table__title"
+        to={`/admin/designers/${designer.id}`}
+      >
         {designer.koreanName || "이름 없음"}
       </Link>
       <span className="admin-table__muted">{designer.englishName || "-"}</span>
       <span className="admin-table__muted">{workCount}개</span>
       <div className="admin-table__actions">
-        <Link className="admin-button admin-button--small" to={`/admin/designers/${designer.id}`}>
+        <Link
+          className="admin-button admin-button--small"
+          to={`/admin/designers/${designer.id}`}
+        >
           수정
         </Link>
         <button
@@ -67,8 +77,9 @@ function SeedNotice({ onSeeded }) {
   return (
     <div className="admin-notice">
       <p>
-        DB에 등록된 디자이너가 없어 사이트에는 기본 디자이너 {defaultDesigners.length}명이 보이고 있습니다.
-        먼저 기본 목록을 불러온 뒤 수정해 주세요. 작품과의 연결은 그대로 유지됩니다.
+        DB에 등록된 디자이너가 없어 사이트에는 기본 디자이너{" "}
+        {defaultDesigners.length}명이 보이고 있습니다. 먼저 기본 목록을 불러온
+        뒤 수정해 주세요. 작품과의 연결은 그대로 유지됩니다.
       </p>
       <button
         className="admin-button admin-button--primary"
@@ -76,7 +87,9 @@ function SeedNotice({ onSeeded }) {
         onClick={seed}
         type="button"
       >
-        {status === "saving" ? "불러오는 중..." : `기본 디자이너 ${defaultDesigners.length}명 불러오기`}
+        {status === "saving"
+          ? "불러오는 중..."
+          : `기본 디자이너 ${defaultDesigners.length}명 불러오기`}
       </button>
       {error ? <p className="admin-error">{error}</p> : null}
     </div>
@@ -84,7 +97,13 @@ function SeedNotice({ onSeeded }) {
 }
 
 function DesignersManager() {
-  const { error: loadError, isDefault, items, reload, setItems } = useDesigners();
+  const {
+    error: loadError,
+    isDefault,
+    items,
+    reload,
+    setItems,
+  } = useDesigners();
   const works = useCollection(WORKS_COLLECTION, normalizeWork);
   const [actionError, setActionError] = useState(null);
   const [search, setSearch] = useState("");
@@ -93,7 +112,9 @@ function DesignersManager() {
   const workCounts = useMemo(() => {
     const counts = new Map();
     works.items?.forEach((work) =>
-      work.designerIds.forEach((id) => counts.set(id, (counts.get(id) ?? 0) + 1)),
+      work.designerIds.forEach((id) =>
+        counts.set(id, (counts.get(id) ?? 0) + 1),
+      ),
     );
     return counts;
   }, [works.items]);
@@ -110,7 +131,10 @@ function DesignersManager() {
     setItems(nextDesigners);
     setActionError(null);
     try {
-      await saveOrder(DESIGNERS_COLLECTION, nextDesigners.map((designer) => designer.id));
+      await saveOrder(
+        DESIGNERS_COLLECTION,
+        nextDesigners.map((designer) => designer.id),
+      );
     } catch (orderError) {
       setActionError(`순서를 저장하지 못했습니다: ${orderError.message}`);
       void reload();
@@ -139,13 +163,21 @@ function DesignersManager() {
     <div className="admin-page">
       <PageHeader
         status={items ? `전체 ${items.length}명` : "불러오는 중..."}
-        title="디자이너"
+        title="DESIGNERS"
       >
-        <a className="admin-button" href="/designers" target="_blank" rel="noreferrer">
+        <a
+          className="admin-button"
+          href="/designers"
+          target="_blank"
+          rel="noreferrer"
+        >
           페이지 보기
         </a>
         {isDefault ? null : (
-          <Link className="admin-button admin-button--primary" to="/admin/designers/new">
+          <Link
+            className="admin-button admin-button--primary"
+            to="/admin/designers/new"
+          >
             + 디자이너 추가
           </Link>
         )}
@@ -167,17 +199,18 @@ function DesignersManager() {
                 value={search}
               />
             </div>
-            <p className="admin-field__hint admin-toolbar__hint">
-              {keyword
-                ? "검색하는 동안에는 순서를 바꿀 수 없습니다."
-                : "드래그해서 바꾼 순서가 바로 사이트 디자이너 목록 순서로 저장됩니다."}
-            </p>
 
             {visibleDesigners.length === 0 ? (
               <p className="admin-empty">조건에 맞는 디자이너가 없습니다.</p>
             ) : (
-              <div className="admin-table" style={{ "--admin-table-columns": TABLE_COLUMNS }}>
-                <div className="admin-table__row admin-table__row--head" aria-hidden="true">
+              <div
+                className="admin-table"
+                style={{ "--admin-table-columns": TABLE_COLUMNS }}
+              >
+                <div
+                  className="admin-table__row admin-table__row--head"
+                  aria-hidden="true"
+                >
                   <span />
                   <span>프로필</span>
                   <span>이름</span>

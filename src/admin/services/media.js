@@ -10,6 +10,7 @@ export const IMAGE_TYPES = [
   "image/avif",
 ];
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+export const IMAGE_RULE_LABEL = "JPG, PNG, WebP, GIF, SVG, AVIF 지원 (최대 10MB)";
 
 async function authorizedFetch(path, init = {}) {
   if (!MEDIA_API_URL) {

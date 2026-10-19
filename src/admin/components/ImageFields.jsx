@@ -1,31 +1,27 @@
 import { useRef, useState } from "react";
 import { resolveImageSrc } from "../../content/defaultAssets";
-import { IMAGE_TYPES, uploadImage, validateImageFile } from "../services/media";
+import {
+  IMAGE_RULE_LABEL,
+  IMAGE_TYPES,
+  uploadImage,
+  validateImageFile,
+} from "../services/media";
 import SortableList from "./SortableList";
 
 const fulfilledValues = (results) =>
   results.filter((result) => result.status === "fulfilled").map((result) => result.value);
 
 /*
- * 파일을 고르면 바로 업로드하고, 끝난 이미지들을 onUploaded로 넘긴다.
+ * 파일을 받으면 바로 업로드하고, 끝난 이미지들을 onUploaded로 넘긴다.
  * 진행 중인 업로드는 trackUpload로 편집기에 알려 그동안 저장을 막는다.
  */
-function UploadButton({
-  children,
-  folder,
-  multiple = false,
-  onUploaded,
-  trackUpload,
-  variant,
-}) {
+function useImageUpload({ folder, onUploaded, trackUpload }) {
   const inputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleChange = async (event) => {
-    const files = [...event.target.files];
-    event.target.value = "";
-    if (files.length === 0) return;
+  const upload = async (files) => {
+    if (files.length === 0 || isUploading) return;
 
     setError(null);
     try {
@@ -36,9 +32,9 @@ function UploadButton({
     }
 
     setIsUploading(true);
-    const upload = Promise.allSettled(files.map((file) => uploadImage(file, folder)));
-    trackUpload(upload.then(fulfilledValues));
-    const results = await upload;
+    const uploading = Promise.allSettled(files.map((file) => uploadImage(file, folder)));
+    trackUpload(uploading.then(fulfilledValues));
+    const results = await uploading;
     setIsUploading(false);
 
     const images = fulfilledValues(results);
@@ -48,24 +44,80 @@ function UploadButton({
     if (failure) setError(failure.reason.message);
   };
 
+  const input = (multiple) => (
+    <input
+      accept={IMAGE_TYPES.join(",")}
+      hidden
+      multiple={multiple}
+      onChange={(event) => {
+        const files = [...event.target.files];
+        event.target.value = "";
+        void upload(files);
+      }}
+      ref={inputRef}
+      type="file"
+    />
+  );
+
+  return {
+    error,
+    input,
+    isUploading,
+    openPicker: () => inputRef.current.click(),
+    upload,
+  };
+}
+
+function UploadButton({ children, variant, ...options }) {
+  const { error, input, isUploading, openPicker } = useImageUpload(options);
+
   return (
     <div className="admin-upload">
       <button
         className={`admin-button${variant ? ` admin-button--${variant}` : ""}`}
         disabled={isUploading}
-        onClick={() => inputRef.current.click()}
+        onClick={openPicker}
         type="button"
       >
         {isUploading ? "업로드 중..." : children}
       </button>
-      <input
-        accept={IMAGE_TYPES.join(",")}
-        hidden
-        multiple={multiple}
-        onChange={handleChange}
-        ref={inputRef}
-        type="file"
-      />
+      {input(false)}
+      {error ? <p className="admin-error">{error}</p> : null}
+    </div>
+  );
+}
+
+/* 클릭해서 고르거나 파일을 끌어 놓아 여러 장을 한 번에 올린다. */
+function UploadDropzone({ showRule, ...options }) {
+  const { error, input, isUploading, openPicker, upload } = useImageUpload(options);
+  const [isOver, setIsOver] = useState(false);
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsOver(false);
+    void upload([...event.dataTransfer.files]);
+  };
+
+  return (
+    <div className="admin-upload admin-upload--block">
+      <button
+        className={`admin-dropzone${isOver ? " is-over" : ""}`}
+        disabled={isUploading}
+        onClick={openPicker}
+        onDragLeave={() => setIsOver(false)}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setIsOver(true);
+        }}
+        onDrop={handleDrop}
+        type="button"
+      >
+        <span className="admin-dropzone__title">
+          {isUploading ? "업로드 중..." : "클릭하거나 파일을 끌어 업로드"}
+        </span>
+        {showRule ? <span className="admin-dropzone__rule">{IMAGE_RULE_LABEL}</span> : null}
+      </button>
+      {input(true)}
       {error ? <p className="admin-error">{error}</p> : null}
     </div>
   );
@@ -121,61 +173,54 @@ export function ImageField({
   );
 }
 
+/* 여러 장을 올리고, 타일을 끌어서 순서를 바꾼다. */
 export function ImageListField({
   folder,
   hint,
   label,
   onChange,
+  showRule = true,
   thumbShape = "portrait",
   trackUpload,
   value,
 }) {
   return (
     <div className="admin-field">
-      <div className="admin-field__header">
-        <span className="admin-field__label">
-          {label} <span className="admin-count">{value.length}개</span>
-        </span>
-        <UploadButton
-          folder={folder}
-          multiple
-          onUploaded={(images) => onChange([...value, ...images])}
-          trackUpload={trackUpload}
-          variant="primary"
-        >
-          이미지 추가
-        </UploadButton>
-      </div>
+      <span className="admin-field__label">
+        {label} <span className="admin-count">{value.length}개</span>
+      </span>
       {hint ? <p className="admin-field__hint">{hint}</p> : null}
 
-      {value.length === 0 ? (
-        <p className="admin-empty">등록된 이미지가 없습니다.</p>
-      ) : (
+      <UploadDropzone
+        folder={folder}
+        onUploaded={(images) => onChange([...value, ...images])}
+        showRule={showRule}
+        trackUpload={trackUpload}
+      />
+
+      {value.length > 0 ? (
         <SortableList
           className="admin-image-grid"
           items={value}
           layout="grid"
           onChange={onChange}
-          renderItem={(image, index, handle) => (
+          renderItem={(image, index) => (
             <figure className="admin-image-tile">
               <Thumb shape={thumbShape} src={image.src} />
-              <figcaption className="admin-image-tile__bar">
-                {handle}
-                <span className="admin-image-tile__index">{index + 1}</span>
-                <button
-                  className="admin-button admin-button--danger admin-button--small"
-                  onClick={() =>
-                    onChange(value.filter((item) => item.id !== image.id))
-                  }
-                  type="button"
-                >
-                  삭제
-                </button>
-              </figcaption>
+              <button
+                aria-label={`${index + 1}번째 이미지 삭제`}
+                className="admin-image-tile__remove"
+                onClick={() => onChange(value.filter((item) => item.id !== image.id))}
+                onPointerDown={(event) => event.stopPropagation()}
+                type="button"
+              >
+                ×
+              </button>
             </figure>
           )}
+          wholeItem
         />
-      )}
+      ) : null}
     </div>
   );
 }

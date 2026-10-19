@@ -116,24 +116,12 @@ function useDocumentEditor(path, normalize, { validate } = {}) {
     }
   }, [draft, path, validate]);
 
-  const revert = useCallback(() => {
-    const unsaved = difference(
-      sessionUploads.current,
-      collectMediaKeys(savedRef.current),
-    );
-    sessionUploads.current.clear();
-    setDraft(savedRef.current);
-    setError(null);
-    if (unsaved.length > 0) void deleteImages(unsaved);
-  }, []);
-
   return {
     draft,
     error,
     exists,
     isDirty,
     isUploading: pendingUploads > 0,
-    revert,
     save,
     status,
     trackUpload,

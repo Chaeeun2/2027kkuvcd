@@ -26,6 +26,8 @@ const IMAGE_EXTENSIONS = new Map([
 
 const FOLDER_PATTERN = /^[a-z0-9-]{1,40}$/;
 const KEY_PATTERN = /^[a-z0-9-]{1,40}\/[0-9a-f-]{36}\.[a-z0-9]{2,5}$/;
+/* scripts/upload-assets.mjs가 올리는 사이트 기본 파일. 이름에 내용 해시가 들어간다. */
+const STATIC_KEY_PATTERN = /^static\/[a-z0-9-]{1,80}\.[0-9a-f]{8}\.[a-z0-9]{2,5}$/;
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -89,6 +91,8 @@ async function serveMedia(request, env, key) {
   /* 키에 UUID가 들어가 같은 주소의 내용이 바뀌지 않으므로 길게 캐시한다. */
   headers.set("Cache-Control", "public, max-age=31536000, immutable");
   headers.set("X-Content-Type-Options", "nosniff");
+  /* 폰트와 3D 모델은 CORS 요청으로 받으므로 공개 파일은 어느 출처에서나 읽게 한다. */
+  headers.set("Access-Control-Allow-Origin", "*");
   /* SVG 안의 스크립트가 이 주소에서 실행되지 않게 막는다. */
   headers.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox");
 
@@ -128,14 +132,17 @@ async function route(request, env) {
   const { pathname } = new URL(request.url);
   const mediaKey = pathname.startsWith("/media/") ? pathname.slice("/media/".length) : null;
 
-  if (mediaKey !== null && !KEY_PATTERN.test(mediaKey)) {
+  const isStatic = mediaKey !== null && STATIC_KEY_PATTERN.test(mediaKey);
+  if (mediaKey !== null && !isStatic && !KEY_PATTERN.test(mediaKey)) {
     throw new HttpError(404, "이미지를 찾을 수 없습니다.");
   }
 
   if (mediaKey && (request.method === "GET" || request.method === "HEAD")) {
     return serveMedia(request, env, mediaKey);
   }
-  if (mediaKey && request.method === "DELETE") return deleteMedia(request, env, mediaKey);
+  if (mediaKey && !isStatic && request.method === "DELETE") {
+    return deleteMedia(request, env, mediaKey);
+  }
   if (pathname === "/upload" && request.method === "PUT") return uploadMedia(request, env);
 
   throw new HttpError(404, "없는 경로입니다.");

@@ -46,7 +46,7 @@
   container-type: inline-size;
   width: 100%;
   height: auto;
-  aspect-ratio: 410 / 257;
+  aspect-ratio: 410 / 252;
   border-radius: 6px;
   outline: none;
   opacity: 0;
@@ -75,6 +75,8 @@
   position: absolute;
   inset: 0;
   display: grid;
+  /* 칸 크기를 카드에 고정해야 비율이 다른 이미지도 카드 높이에 맞춰 잘린다. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   overflow: hidden;
   border-radius: inherit;
   backface-visibility: hidden;
@@ -198,7 +200,7 @@
     width: 100%;
     margin-bottom: 40px;
     padding-bottom: 8px;
-    border-bottom: 1px solid white;
+    border-bottom: 1.5px solid white;
     color: var(--color-text);
   }
 

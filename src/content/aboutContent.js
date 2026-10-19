@@ -1,11 +1,15 @@
 import createCachedLoader from "./cachedLoader";
+import { workWorlds } from "../data/works";
 import { assetImage } from "./defaultAssets";
 import { fetchFirestoreDocument } from "./firestoreRest";
-import { bilingual, image, list, text } from "./normalize";
+import { bilingual, image, isText, list, text } from "./normalize";
 
 export const ABOUT_DOCUMENT_PATH = "pages/about";
 
+const worlds = workWorlds.slice(1);
+
 export const defaultAboutContent = {
+  backgrounds: [1, 2, 3, 4].map((n) => assetImage(`about/background-${n}`)),
   introImage: assetImage("about/intro"),
   subtitle: {
     ko: "2027 건국대학교 디자인대학교\n시각영상디자인학과 시각트랙\n졸업전시회",
@@ -69,6 +73,13 @@ export const defaultAboutContent = {
     })),
   })),
   supports: [1, 2, 3].map((n) => assetImage(`about/support-${n}`)),
+  /* WORKS 페이지에서 World를 고르면 보이는 설명글. world id별 { ko, en } */
+  worldDescriptions: Object.fromEntries(
+    worlds.map(({ descriptionEn, descriptionKo, id }) => [
+      id,
+      { ko: descriptionKo, en: descriptionEn },
+    ]),
+  ),
 };
 
 /* DB 문서에 빠진 필드나 형식이 틀린 값은 기본 콘텐츠로 채운다. */
@@ -77,8 +88,12 @@ export function normalizeAboutContent(data) {
   if (!data) return fallback;
 
   return {
+    backgrounds: list(data.backgrounds, image, fallback.backgrounds),
     introImage: image(data.introImage) ?? fallback.introImage,
-    subtitle: bilingual(data.subtitle, fallback.subtitle),
+    /* 한때 영문 문자열 하나로 저장한 문서가 있어 그 값은 영문으로 이어 쓴다. */
+    subtitle: isText(data.subtitle)
+      ? { ko: fallback.subtitle.ko, en: data.subtitle }
+      : bilingual(data.subtitle, fallback.subtitle),
     body: bilingual(data.body, fallback.body),
     instagram: {
       label: text(data.instagram?.label, fallback.instagram.label),
@@ -116,6 +131,12 @@ export function normalizeAboutContent(data) {
       fallback.faculty,
     ),
     supports: list(data.supports, image, fallback.supports),
+    worldDescriptions: Object.fromEntries(
+      worlds.map(({ id }) => [
+        id,
+        bilingual(data.worldDescriptions?.[id], fallback.worldDescriptions[id]),
+      ]),
+    ),
   };
 }
 

@@ -2,11 +2,11 @@ import { Link } from "react-router-dom";
 import PageHeader from "./PageHeader";
 
 /*
- * 편집 화면 제목 줄. 저장 상태와 되돌리기·저장 버튼을 단다.
+ * 편집 화면 제목 줄. 저장 상태와 저장 버튼을 단다.
  * back({ to, label })을 주면 저장하지 않은 변경사항을 확인한 뒤 목록으로 돌아가는 링크를 단다.
  */
 function EditorHeader({ back, editor, previewUrl, title }) {
-  const { isDirty, isUploading, revert, save, status } = editor;
+  const { isDirty, isUploading, save, status } = editor;
   const isSaving = status === "saving";
   const isLocked = !isDirty || isSaving || isUploading;
   const statusText = isUploading
@@ -38,14 +38,6 @@ function EditorHeader({ back, editor, previewUrl, title }) {
           페이지 보기
         </a>
       ) : null}
-      <button
-        className="admin-button"
-        disabled={isLocked}
-        onClick={revert}
-        type="button"
-      >
-        되돌리기
-      </button>
       <button
         className="admin-button admin-button--primary"
         disabled={isLocked}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { assetUrl } from "../content/assetUrl";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import LanguageToggle from "../components/LanguageToggle";
@@ -10,19 +11,14 @@ import {
 import { resolveImageSrc } from "../content/defaultAssets";
 import usePageContent from "../content/usePageContent";
 import useIsMobile from "../hooks/useIsMobile";
-import aboutBg from "../assets/about_bg.jpg";
-import introBg1 from "../assets/about-section1-bg01.jpg";
-import introBg2 from "../assets/about-section1-bg02.jpg";
-import introBg3 from "../assets/about-section1-bg03.jpg";
-import introBg4 from "../assets/about-section1-bg04.jpg";
-import infoCard from "../assets/about-section2-img.png";
-import contributorBox from "../assets/about-section4-img.png";
-import facultyGraphic from "../assets/about-section5-img.jpg";
-import lineImage from "../assets/line.png";
 import { scheduleReveal } from "../utils/loadingReveal";
 import "../about.css";
 
-const introBackgrounds = [introBg1, introBg2, introBg3, introBg4];
+const aboutBg = assetUrl("about_bg.jpg");
+const infoCard = assetUrl("about-section2-img.png");
+const contributorBox = assetUrl("about-section4-img.png");
+const facultyGraphic = assetUrl("about-section5-img.jpg");
+const lineImage = assetUrl("line.png");
 
 const factLabels = {
   ko: { hours: "시간", venue: "장소" },
@@ -137,43 +133,38 @@ function useScrollReveal() {
   return pageRef;
 }
 
-function IntroBackground() {
+function IntroBackground({ images }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const count = images.length;
 
   useEffect(() => {
-    let intervalId;
-    const firstChangeId = window.setTimeout(() => {
-      setActiveIndex(1);
-      intervalId = window.setInterval(() => {
-        setActiveIndex((index) => (index + 1) % introBackgrounds.length);
-      }, 3000);
+    if (count < 2) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setActiveIndex((index) => (index + 1) % count);
     }, 3000);
 
-    return () => {
-      window.clearTimeout(firstChangeId);
-      window.clearInterval(intervalId);
-    };
-  }, []);
+    return () => window.clearInterval(intervalId);
+  }, [count]);
 
   return (
     <div className="about-intro-background" aria-hidden="true">
-      {introBackgrounds.map((image, index) => (
+      {images.map((item, index) => (
         <img
-          className={index === activeIndex ? "is-active" : ""}
-          src={image}
+          className={index === activeIndex % count ? "is-active" : ""}
+          src={resolveImageSrc(item.src)}
           alt=""
-          key={image}
+          key={item.id}
         />
       ))}
     </div>
   );
 }
 
-function PhotoStrip({ gallery, isMobile }) {
-  const images = (isMobile ? gallery.slice(0, 3) : gallery).map((item) =>
-    resolveImageSrc(item.src),
-  );
-  const repeatedImages = isMobile ? images : [...images, ...images];
+/* 같은 사진 묶음을 두 번 이어 붙여, 절반만큼 흘러가면 처음으로 돌아가도 끊김이 없다. */
+function PhotoStrip({ gallery }) {
+  const images = gallery.map((item) => resolveImageSrc(item.src));
+  const repeatedImages = [...images, ...images];
 
   return (
     <section
@@ -213,7 +204,7 @@ function AboutPageContent({ content }) {
   return (
     <main className="about-page" ref={pageRef}>
       <Header reveal />
-      <IntroBackground />
+      <IntroBackground images={content.backgrounds} />
       <div className="about-page-background" aria-hidden="true">
         <img src={aboutBg} alt="" />
       </div>
@@ -335,7 +326,7 @@ function AboutPageContent({ content }) {
           </div>
         </section>
 
-        <PhotoStrip gallery={content.gallery} isMobile={isMobile} />
+        <PhotoStrip gallery={content.gallery} />
 
         <section className="about-contributors">
           <h2 data-reveal>CONTRIBUTORS</h2>

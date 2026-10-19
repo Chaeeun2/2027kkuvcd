@@ -669,7 +669,7 @@
     height: 40.18px;
     align-items: center;
     justify-content: center;
-    background: url("./assets/about-band-mobile.svg") left center /
+    background: url("https://kkuvcd-2027-media.winter-sun-8ec7.workers.dev/media/static/about-band-mobile.c892adf9.svg") left center /
       calc(100% - var(--page-gutter)) 100% no-repeat;
     color: var(--color-text);
     font-family: var(--font-display);
@@ -761,10 +761,7 @@
   }
 
   .about-gallery-track {
-    width: 100%;
-    justify-content: center;
-    gap: 16px;
-    animation: none;
+    --about-gallery-gap: 16px;
   }
 
   .about-gallery img {

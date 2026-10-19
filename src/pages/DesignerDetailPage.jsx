@@ -1,10 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
+import { assetUrl } from "../content/assetUrl";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import MultilineText from "../components/MultilineText";
-import designerLine from "../assets/designer-line.png";
-import projectArrow from "../assets/designer-work-arrow.png";
 import { formatEnglishName } from "../data/designers";
 import { getCachedDesigners, loadDesigners } from "../content/designersContent";
 import usePageContent from "../content/usePageContent";
@@ -16,6 +15,9 @@ import {
 import useIsMobile from "../hooks/useIsMobile";
 import { scheduleReveal } from "../utils/loadingReveal";
 import "../designer-detail.css";
+
+const designerLine = assetUrl("designer-line.png");
+const projectArrow = assetUrl("designer-work-arrow.png");
 
 const emptyProjects = Array.from({ length: 3 }, (_, index) => ({
   id: `empty-project-${index + 1}`,
@@ -132,22 +134,24 @@ function DesignerDetailContent({ designers, works }) {
                     <span>{displayEnglishName}</span>
                   </div>
 
-                  <dl className="designer-detail-contacts">
-                    <div>
-                      <dt>Email</dt>
-                      <dd>
-                        {designer.email ? (
-                          <a href={`mailto:${designer.email}`}>{designer.email}</a>
-                        ) : (
-                          "준비 중"
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Instagram</dt>
-                      <dd>{designer.instagram || "준비 중"}</dd>
-                    </div>
-                  </dl>
+                  {designer.email || designer.instagram ? (
+                    <dl className="designer-detail-contacts">
+                      {designer.email ? (
+                        <div>
+                          <dt>Email</dt>
+                          <dd>
+                            <a href={`mailto:${designer.email}`}>{designer.email}</a>
+                          </dd>
+                        </div>
+                      ) : null}
+                      {designer.instagram ? (
+                        <div>
+                          <dt>Instagram</dt>
+                          <dd>{designer.instagram}</dd>
+                        </div>
+                      ) : null}
+                    </dl>
+                  ) : null}
                 </div>
 
                 <div className="designer-detail-signature">

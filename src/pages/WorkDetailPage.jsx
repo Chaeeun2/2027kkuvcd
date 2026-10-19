@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { assetUrl } from "../content/assetUrl";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import LanguageToggle from "../components/LanguageToggle";
@@ -11,54 +12,12 @@ import {
   loadWorks,
 } from "../content/worksContent";
 import useIsMobile from "../hooks/useIsMobile";
-import projectArrow from "../assets/designer-work-arrow.png";
 import { workCategories, workWorlds } from "../data/works";
 import { scheduleReveal } from "../utils/loadingReveal";
-import { toVideoEmbedUrl } from "../utils/videoEmbed";
 import "../works.css";
 import "../work-detail.css";
 
-function GalleryImage({ image, alt }) {
-  return (
-    <div className="work-detail-gallery-image">
-      {image ? <img src={image.src} alt={alt} /> : null}
-    </div>
-  );
-}
-
-function GalleryRow({ row, title }) {
-  if (row.layout === "video") {
-    const embedUrl = toVideoEmbedUrl(row.videoUrl);
-    if (!embedUrl) return null;
-
-    return (
-      <div
-        className="work-detail-gallery-row work-detail-gallery-row--video"
-        data-work-detail-reveal
-      >
-        <iframe
-          className="work-detail-gallery-video"
-          src={embedUrl}
-          title={`${title} 영상`}
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowFullScreen
-          loading="lazy"
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={`work-detail-gallery-row work-detail-gallery-row--${row.layout}`}
-      data-work-detail-reveal
-    >
-      {row.images.map((image, index) => (
-        <GalleryImage image={image} alt={`${title} 상세 이미지`} key={image?.id ?? index} />
-      ))}
-    </div>
-  );
-}
+const projectArrow = assetUrl("designer-work-arrow.png");
 
 function WorkDetailPage() {
   const works = usePageContent(getCachedWorks, loadWorks);
@@ -205,8 +164,14 @@ function WorkDetailContent({ works }) {
           </aside>
 
           <div className="work-detail-gallery">
-            {work.gallery.map((row) => (
-              <GalleryRow row={row} title={work.title} key={row.id} />
+            {work.gallery.map((image) => (
+              <div
+                className={`work-detail-gallery-image${image.src ? "" : " is-empty"}`}
+                data-work-detail-reveal
+                key={image.id}
+              >
+                {image.src ? <img src={image.src} alt={`${work.title} 상세 이미지`} /> : null}
+              </div>
             ))}
           </div>
         </section>

@@ -1,6 +1,6 @@
 @font-face {
   font-family: "OPS Facitype";
-  src: url("./assets/OPSFacitype-Regular.woff") format("woff");
+  src: url("https://kkuvcd-2027-media.winter-sun-8ec7.workers.dev/media/static/opsfacitype-regular.b3a1b37c.woff") format("woff");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: "OPS Favorite";
-  src: url("./assets/OPSFavorite-Regular.woff") format("woff");
+  src: url("https://kkuvcd-2027-media.winter-sun-8ec7.workers.dev/media/static/opsfavorite-regular.4d12ef96.woff") format("woff");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -215,7 +215,7 @@ a {
 .hero-title {
   position: absolute;
   z-index: 1;
-  top: 411px;
+  top: 50%;
   left: 50%;
   width: 1166px;
   height: 79px;
@@ -226,7 +226,7 @@ a {
   font-weight: 400;
   line-height: 0.82;
   white-space: nowrap;
-  transform: translateX(-50%) scaleX(1.12);
+  transform: translate(-50%, -50%) scaleX(1.12);
   pointer-events: none;
 }
 
@@ -454,8 +454,8 @@ a {
 
   .site-menu-toggle {
     display: flex;
-    width: 23.5px;
-    height: 17px;
+    width: 25px;
+    height: 20px;
     flex-direction: column;
     justify-content: space-between;
     padding: 0;
@@ -559,7 +559,7 @@ a {
 
   /* 모바일 시안의 제목은 PC와 달리 가로로 늘리지 않는다. */
   .hero-title {
-    top: 33%;
+    top: 27%;
     width: max-content;
     height: auto;
     line-height: 1.5;

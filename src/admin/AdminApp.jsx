@@ -1,7 +1,8 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { DESIGNERS_COLLECTION } from "../content/designersContent";
 import { WORKS_COLLECTION } from "../content/worksContent";
 import { AuthProvider } from "./auth/AuthContext";
+import AdminErrorBoundary from "./components/AdminErrorBoundary";
 import NewDocumentRedirect from "./components/NewDocumentRedirect";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AboutManager from "./pages/AboutManager";
@@ -29,20 +30,24 @@ const protectedRoutes = [
 ];
 
 function AdminApp() {
+  const { pathname } = useLocation();
+
   return (
     <AuthProvider>
       <div className="admin-root">
-        <Routes>
-          <Route path="/admin/login" element={<LoginPage />} />
-          {protectedRoutes.map(([path, element]) => (
-            <Route
-              element={<ProtectedRoute>{element}</ProtectedRoute>}
-              key={path}
-              path={path}
-            />
-          ))}
-          <Route path="*" element={<Navigate to="/admin/about" replace />} />
-        </Routes>
+        <AdminErrorBoundary resetKey={pathname}>
+          <Routes>
+            <Route path="/admin/login" element={<LoginPage />} />
+            {protectedRoutes.map(([path, element]) => (
+              <Route
+                element={<ProtectedRoute>{element}</ProtectedRoute>}
+                key={path}
+                path={path}
+              />
+            ))}
+            <Route path="*" element={<Navigate to="/admin/about" replace />} />
+          </Routes>
+        </AdminErrorBoundary>
         <p className="admin-mobile-notice">
           관리자 페이지는 PC 화면(1024px 이상)에서 사용해 주세요.
         </p>

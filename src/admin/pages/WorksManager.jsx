@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { resolveImageSrc } from "../../content/defaultAssets";
 import { normalizeWork, WORKS_COLLECTION } from "../../content/worksContent";
-import { categoryLabels, workWorlds } from "../../data/works";
+import { workCategories, workWorlds } from "../../data/works";
 import PageHeader from "../components/PageHeader";
 import SortableList from "../components/SortableList";
 import useCollection from "../hooks/useCollection";
@@ -10,7 +10,12 @@ import useDesigners from "../hooks/useDesigners";
 import { deleteDocument, saveOrder } from "../services/documents";
 import { collectMediaKeys, deleteImages } from "../services/media";
 
-const worldLabels = Object.fromEntries(workWorlds.map(({ id, label }) => [id, label]));
+const categoryLabels = Object.fromEntries(
+  workCategories.slice(1).map(({ id, label }) => [id, label]),
+);
+const worldLabels = Object.fromEntries(
+  workWorlds.map(({ id, label }) => [id, label]),
+);
 
 const visibilityFilters = [
   { id: "all", label: "전체" },
@@ -23,23 +28,34 @@ function WorkRow({ handle, onDelete, work }) {
     <div className="admin-table__row">
       {handle ?? <span />}
       {work.thumbnail ? (
-        <img className="admin-table__thumb" src={resolveImageSrc(work.thumbnail.src)} alt="" />
+        <img
+          className="admin-table__thumb"
+          src={resolveImageSrc(work.thumbnail.src)}
+          alt=""
+        />
       ) : (
         <span className="admin-table__thumb admin-thumb--empty" />
       )}
       <Link className="admin-table__title" to={`/admin/works/${work.id}`}>
         {work.title || "제목 없음"}
       </Link>
-      <span className="admin-table__muted">{work.designerNames.join(", ") || "-"}</span>
+      <span className="admin-table__muted">
+        {work.designerNames.join(", ") || "-"}
+      </span>
       <span className="admin-table__muted">
         {work.categoryIds.map((id) => categoryLabels[id]).join(", ") || "-"}
       </span>
-      <span className="admin-table__muted">{worldLabels[work.worldType] ?? "-"}</span>
+      <span className="admin-table__muted">
+        {worldLabels[work.worldType] ?? "-"}
+      </span>
       <span className={`admin-badge${work.published ? " is-on" : ""}`}>
         {work.published ? "공개" : "비공개"}
       </span>
       <div className="admin-table__actions">
-        <Link className="admin-button admin-button--small" to={`/admin/works/${work.id}`}>
+        <Link
+          className="admin-button admin-button--small"
+          to={`/admin/works/${work.id}`}
+        >
           수정
         </Link>
         <button
@@ -57,23 +73,28 @@ function WorkRow({ handle, onDelete, work }) {
 function WorksManager() {
   const collection = useCollection(WORKS_COLLECTION, normalizeWork);
   const { reload, setItems } = collection;
-  const { designers } = useDesigners();
+  const { designers, error: designersError } = useDesigners();
   const [actionError, setActionError] = useState(null);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [visibility, setVisibility] = useState("all");
-  const error = actionError ?? collection.error;
+  const error = actionError ?? collection.error ?? designersError;
 
   const works = useMemo(() => {
-    if (!collection.items) return null;
-    const names = new Map(designers.map((designer) => [designer.id, designer.koreanName]));
+    if (!collection.items || !designers) return null;
+    const names = new Map(
+      designers.map((designer) => [designer.id, designer.koreanName]),
+    );
     return collection.items.map((work) => ({
       ...work,
-      designerNames: work.designerIds.map((id) => names.get(id)).filter(Boolean),
+      designerNames: work.designerIds
+        .map((id) => names.get(id))
+        .filter(Boolean),
     }));
   }, [collection.items, designers]);
 
-  const isFiltered = Boolean(search.trim()) || category !== "all" || visibility !== "all";
+  const isFiltered =
+    Boolean(search.trim()) || category !== "all" || visibility !== "all";
 
   const visibleWorks = useMemo(() => {
     if (!works) return [];
@@ -85,7 +106,8 @@ function WorksManager() {
           work.title.toLowerCase().includes(keyword) ||
           work.designerNames.some((name) => name.includes(keyword))) &&
         (category === "all" || work.categoryIds.includes(category)) &&
-        (visibility === "all" || work.published === (visibility === "published")),
+        (visibility === "all" ||
+          work.published === (visibility === "published")),
     );
   }, [category, search, visibility, works]);
 
@@ -93,7 +115,10 @@ function WorksManager() {
     setItems(nextWorks);
     setActionError(null);
     try {
-      await saveOrder(WORKS_COLLECTION, nextWorks.map((work) => work.id));
+      await saveOrder(
+        WORKS_COLLECTION,
+        nextWorks.map((work) => work.id),
+      );
     } catch (orderError) {
       setActionError(`순서를 저장하지 못했습니다: ${orderError.message}`);
       void reload();
@@ -101,7 +126,11 @@ function WorksManager() {
   };
 
   const handleDelete = async (work) => {
-    if (!window.confirm(`'${work.title || "제목 없음"}' 작품을 삭제할까요? 되돌릴 수 없습니다.`)) {
+    if (
+      !window.confirm(
+        `'${work.title || "제목 없음"}' 작품을 삭제할까요? 되돌릴 수 없습니다.`,
+      )
+    ) {
       return;
     }
 
@@ -120,13 +149,25 @@ function WorksManager() {
   return (
     <div className="admin-page">
       <PageHeader
-        status={works ? `전체 ${works.length}개 · 공개 ${publishedCount}개` : "불러오는 중..."}
-        title="작품"
+        status={
+          works
+            ? `전체 ${works.length}개 · 공개 ${publishedCount}개`
+            : "불러오는 중..."
+        }
+        title="WORKS"
       >
-        <a className="admin-button" href="/works" target="_blank" rel="noreferrer">
+        <a
+          className="admin-button"
+          href="/works"
+          target="_blank"
+          rel="noreferrer"
+        >
           페이지 보기
         </a>
-        <Link className="admin-button admin-button--primary" to="/admin/works/new">
+        <Link
+          className="admin-button admin-button--primary"
+          to="/admin/works/new"
+        >
           + 작품 추가
         </Link>
       </PageHeader>
@@ -169,17 +210,14 @@ function WorksManager() {
               ))}
             </select>
           </div>
-          <p className="admin-field__hint admin-toolbar__hint">
-            {isFiltered
-              ? "검색이나 필터를 쓰는 동안에는 순서를 바꿀 수 없습니다."
-              : "드래그해서 바꾼 순서가 바로 사이트 작품 목록 순서로 저장됩니다."}
-          </p>
 
           {!works ? (
             <p className="admin-empty">불러오는 중...</p>
           ) : visibleWorks.length === 0 ? (
             <p className="admin-empty">
-              {works.length === 0 ? "등록된 작품이 없습니다. 작품을 추가해 주세요." : "조건에 맞는 작품이 없습니다."}
+              {works.length === 0
+                ? "등록된 작품이 없습니다. 작품을 추가해 주세요."
+                : "조건에 맞는 작품이 없습니다."}
             </p>
           ) : (
             <div
@@ -189,13 +227,16 @@ function WorksManager() {
                   "28px 96px minmax(0, 2fr) minmax(0, 1.4fr) minmax(0, 1fr) 90px 64px 128px",
               }}
             >
-              <div className="admin-table__row admin-table__row--head" aria-hidden="true">
+              <div
+                className="admin-table__row admin-table__row--head"
+                aria-hidden="true"
+              >
                 <span />
                 <span>썸네일</span>
                 <span>작품명</span>
                 <span>디자이너</span>
                 <span>카테고리</span>
-                <span>World</span>
+                <span>이념</span>
                 <span>상태</span>
                 <span />
               </div>
@@ -209,7 +250,11 @@ function WorksManager() {
                   items={works}
                   onChange={handleReorder}
                   renderItem={(work, index, handle) => (
-                    <WorkRow handle={handle} onDelete={handleDelete} work={work} />
+                    <WorkRow
+                      handle={handle}
+                      onDelete={handleDelete}
+                      work={work}
+                    />
                   )}
                 />
               )}

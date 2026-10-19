@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { assetUrl } from "../content/assetUrl";
 import DesignerCard from "../components/DesignerCard";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-import searchIcon from "../assets/search-icon.svg";
 import { getCachedDesigners, loadDesigners } from "../content/designersContent";
 import usePageContent from "../content/usePageContent";
 import { formatEnglishName } from "../data/designers";
 import useIsMobile from "../hooks/useIsMobile";
 import { scheduleReveal } from "../utils/loadingReveal";
 import "../designers.css";
+
+const searchIcon = assetUrl("search-icon.svg");
 
 function DesignersPage() {
   const designers = usePageContent(getCachedDesigners, loadDesigners);

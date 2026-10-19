@@ -2,9 +2,9 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 const menuItems = [
-  { to: "/admin/about", label: "전시소개" },
-  { to: "/admin/works", label: "작품" },
-  { to: "/admin/designers", label: "디자이너" },
+  { to: "/admin/about", label: "ABOUT" },
+  { to: "/admin/designers", label: "DESIGNERS" },
+  { to: "/admin/works", label: "WORKS" },
 ];
 
 function AdminLayout({ children }) {

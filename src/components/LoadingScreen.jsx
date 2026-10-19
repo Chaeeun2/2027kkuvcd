@@ -1,4 +1,6 @@
-import logoUrl from "../assets/logo.png";
+import { assetUrl } from "../content/assetUrl";
+
+const logoUrl = assetUrl("logo.png");
 
 function LoadingScreen({
   duration,

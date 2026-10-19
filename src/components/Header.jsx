@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import logoUrl from "../assets/logo.png";
+import { assetUrl } from "../content/assetUrl";
+
+const logoUrl = assetUrl("logo.png");
 
 function Header({ reveal = false }) {
   const [isHidden, setIsHidden] = useState(false);
