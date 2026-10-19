@@ -2,6 +2,7 @@
  * src/assets 파일을 R2(kkuvcd-2027-media 버킷)의 static/ 아래로 올리고
  * src/content/assetManifest.json에 "파일명 → R2 키"를 기록한다.
  * 키에 내용 해시가 들어가므로 파일을 바꾸면 새 키로 올라가고, 바뀌지 않은 파일은 건너뛴다.
+ * 올린 파일은 로컬에서 지워도 된다.
  *
  *   npm run upload-assets
  */
@@ -40,7 +41,8 @@ function slugify(name) {
 const previous = existsSync(MANIFEST_PATH)
   ? JSON.parse(readFileSync(MANIFEST_PATH, "utf8"))
   : {};
-const manifest = {};
+/* 올린 뒤 로컬에서 지운 파일도 R2에는 남아 있으므로 기존 기록을 이어 쓴다. */
+const manifest = { ...previous };
 
 const files = readdirSync(ASSETS_DIR)
   .filter((name) => !name.startsWith("."))
