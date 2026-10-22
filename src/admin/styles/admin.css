@@ -683,8 +683,8 @@ textarea.admin-input {
 
 .admin-thumb--card {
   width: calc(var(--admin-thumb-width) * 1.6);
-  aspect-ratio: 410 / 252;
-  object-fit: contain;
+  aspect-ratio: 410 / 258;
+  object-fit: cover;
 }
 
 .admin-thumb--empty {

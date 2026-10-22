@@ -34,6 +34,7 @@ export const defaultAboutContent = {
     en: "7, Daehak-ro, Jongno-gu,\nSeoul, Republic of Korea,\nB2 Exhibition Hall 3",
   },
   gallery: [1, 2, 3, 4, 5].map((n) => assetImage(`about/gallery-${n}`)),
+  contributorImage: assetImage("about/contributor"),
   committee: [
     ["위원장", "이청경"],
     ["부위원장", "김서영"],
@@ -44,6 +45,7 @@ export const defaultAboutContent = {
     ["웹", "이승민 이청경"],
     ["홍보", "김서영"],
   ].map(([role, name], index) => ({ id: `committee-${index}`, role, name })),
+  facultyImage: assetImage("about/faculty"),
   faculty: [
     {
       title: "시각트랙",
@@ -104,6 +106,7 @@ export function normalizeAboutContent(data) {
     hours: text(data.hours, fallback.hours),
     venue: bilingual(data.venue, fallback.venue),
     gallery: list(data.gallery, image, fallback.gallery),
+    contributorImage: image(data.contributorImage) ?? fallback.contributorImage,
     committee: list(
       data.committee,
       (item, index) => ({
@@ -113,6 +116,7 @@ export function normalizeAboutContent(data) {
       }),
       fallback.committee,
     ),
+    facultyImage: image(data.facultyImage) ?? fallback.facultyImage,
     faculty: list(
       data.faculty,
       (track, trackIndex) => ({

@@ -1,6 +1,8 @@
 import { assetUrl } from "./assetUrl";
 
 const introImage = assetUrl("about-main-img.jpg");
+const contributorImage = assetUrl("about-section4-img.png");
+const facultyImage = assetUrl("about-section5-img.jpg");
 const background1 = assetUrl("about-section1-bg01.jpg");
 const background2 = assetUrl("about-section1-bg02.jpg");
 const background3 = assetUrl("about-section1-bg03.jpg");
@@ -25,6 +27,8 @@ const ASSET_PREFIX = "asset:";
 
 const defaultAssets = {
   "about/intro": introImage,
+  "about/contributor": contributorImage,
+  "about/faculty": facultyImage,
   "about/background-1": background1,
   "about/background-2": background2,
   "about/background-3": background3,

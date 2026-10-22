@@ -16,8 +16,6 @@ import "../about.css";
 
 const aboutBg = assetUrl("about_bg.jpg");
 const infoCard = assetUrl("about-section2-img.png");
-const contributorBox = assetUrl("about-section4-img.png");
-const facultyGraphic = assetUrl("about-section5-img.jpg");
 const lineImage = assetUrl("line.png");
 
 const factLabels = {
@@ -228,38 +226,40 @@ function AboutPageContent({ content }) {
             </div>
             <div className="about-intro-description">
               {isMobile ? (
-                <p data-reveal data-reveal-delay="160">
+                <p data-reveal data-reveal-delay="160" lang={language}>
                   {content.body[language]}
                 </p>
               ) : (
                 <>
-                  <p data-reveal data-reveal-delay="160">
+                  <p data-reveal data-reveal-delay="160" lang="ko">
                     {content.body.ko}
                   </p>
-                  <p data-reveal data-reveal-delay="240">
+                  <p data-reveal data-reveal-delay="240" lang="en">
                     {content.body.en}
                   </p>
                 </>
               )}
             </div>
             {isMobile ? (
-              <LanguageToggle
-                language={language}
-                onToggle={() =>
-                  setLanguage((current) => (current === "ko" ? "en" : "ko"))
-                }
-              />
+              <>
+                <LanguageToggle
+                  language={language}
+                  onToggle={() =>
+                    setLanguage((current) => (current === "ko" ? "en" : "ko"))
+                  }
+                />
+                <a
+                  className="about-instagram"
+                  href={content.instagram.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  data-reveal
+                  data-reveal-delay="320"
+                >
+                  {content.instagram.label}
+                </a>
+              </>
             ) : null}
-            <a
-              className="about-instagram"
-              href={content.instagram.url}
-              target="_blank"
-              rel="noreferrer"
-              data-reveal
-              data-reveal-delay="320"
-            >
-              {content.instagram.label}
-            </a>
           </div>
         </section>
 
@@ -351,7 +351,7 @@ function AboutPageContent({ content }) {
           </div>
           <img
             className="about-contributor-box"
-            src={contributorBox}
+            src={resolveImageSrc(content.contributorImage.src)}
             alt=""
             data-reveal
             data-reveal-delay="120"
@@ -366,7 +366,7 @@ function AboutPageContent({ content }) {
         <section className="about-faculty">
           <img
             className="about-faculty-graphic"
-            src={facultyGraphic}
+            src={resolveImageSrc(content.facultyImage.src)}
             alt=""
             data-reveal
             data-reveal-direction="from-left"

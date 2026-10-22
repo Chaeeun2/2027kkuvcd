@@ -85,11 +85,24 @@
     var(--about-content-width),
     100% - var(--about-section-padding) * 2
   );
-  min-height: var(--about-hero-height);
-  align-items: center;
+  box-sizing: border-box;
+  min-height: 100dvh;
+  align-items: flex-start;
   gap: calc(65 * var(--about-unit));
   margin: 0 auto;
-  padding: 50px 0 0 0;
+  /*
+   * 세로 여백은 위·아래 대칭(최소 하단 180px). 위는 헤더+50px보다 작지 않게.
+   * 콘텐츠가 길면 min-height(100dvh)보다 섹션이 길어진다.
+   */
+  --about-intro-vertical-pad: max(
+    180px,
+    calc((100dvh - var(--about-intro-content-height)) / 2)
+  );
+  padding-top: max(
+    calc(var(--header-height) + 50px),
+    var(--about-intro-vertical-pad)
+  );
+  padding-bottom: var(--about-intro-vertical-pad);
 }
 
 .about-intro-image {
@@ -138,7 +151,7 @@
 
 .about-intro-description {
   display: flex;
-  gap: 24px;
+  gap: 40px;
 }
 
 .about-intro-description p {
@@ -148,6 +161,18 @@
   font-size: var(--about-font-size-body);
   font-weight: 500;
   line-height: 1.5;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* 영문은 lang과 함께 줄 끝 하이픈. 국문은 브라우저 자동 하이픈이 거의 없어 break-all 유지. */
+.about-intro-description p:lang(ko) {
+  word-break: break-all;
+}
+
+.about-intro-description p:lang(en) {
+  word-break: normal;
 }
 
 .about-instagram {
@@ -669,8 +694,8 @@
     height: 40.18px;
     align-items: center;
     justify-content: center;
-    background: url("https://kkuvcd-2027-media.winter-sun-8ec7.workers.dev/media/static/about-band-mobile.c892adf9.svg") left center /
-      calc(100% - var(--page-gutter)) 100% no-repeat;
+    background: url("https://kkuvcd-2027-media.winter-sun-8ec7.workers.dev/media/static/about-band-mobile.c892adf9.svg")
+      left center / calc(100% - var(--page-gutter)) 100% no-repeat;
     color: var(--color-text);
     font-family: var(--font-display);
     font-size: 20px;

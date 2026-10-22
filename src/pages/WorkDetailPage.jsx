@@ -19,6 +19,59 @@ import "../work-detail.css";
 
 const projectArrow = assetUrl("designer-work-arrow.png");
 
+function RelatedProject({ project }) {
+  return (
+    <Link className="related-project" to={`/works/${project.id}`}>
+      <div className="related-project__thumbnail">
+        {project.thumbnail?.src ? (
+          <img src={project.thumbnail.src} alt={project.title} />
+        ) : null}
+        <img className="related-project__arrow" src={projectArrow} alt="" />
+      </div>
+      <div>
+        <h2>{project.title}</h2>
+        <p>{project.categoryLabel}</p>
+      </div>
+    </Link>
+  );
+}
+
+function RelatedWorks({ relatedWorks, work }) {
+  const isDualDesigner = work.designers.length === 2;
+
+  if (!isDualDesigner) {
+    return (
+      <div className="work-detail-related">
+        {relatedWorks.map((project) => (
+          <RelatedProject key={project.id} project={project} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="work-detail-related work-detail-related--grouped">
+      {work.designers.map((designer) => {
+        const projects = relatedWorks.filter((item) =>
+          item.designerIds.includes(designer.id),
+        );
+        if (projects.length === 0) return null;
+
+        return (
+          <section className="work-detail-related-group" key={designer.id}>
+            <h3 className="work-detail-related-name">{designer.name}</h3>
+            <div className="work-detail-related-grid">
+              {projects.map((project) => (
+                <RelatedProject key={project.id} project={project} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 function WorkDetailPage() {
   const works = usePageContent(getCachedWorks, loadWorks);
   if (!works) return <main className="work-detail-page" />;
@@ -113,7 +166,7 @@ function WorkDetailContent({ works }) {
               >
                 {isMobile ? (
                   <>
-                    <p>{work.description[language]}</p>
+                    <p lang={language}>{work.description[language]}</p>
                     <LanguageToggle
                       language={language}
                       onToggle={() =>
@@ -125,39 +178,15 @@ function WorkDetailContent({ works }) {
                   </>
                 ) : (
                   <>
-                    <p>{work.description.ko}</p>
-                    <p>{work.description.en}</p>
+                    <p lang="ko">{work.description.ko}</p>
+                    <p lang="en">{work.description.en}</p>
                   </>
                 )}
               </div>
 
-              {relatedWorks.length > 0 ? (
-                <div
-                  className="work-detail-related"
-                  data-work-detail-reveal
-                >
-                  {relatedWorks.map((project) => (
-                    <Link
-                      className="related-project"
-                      to={`/works/${project.id}`}
-                      key={project.id}
-                    >
-                      <div className="related-project__thumbnail">
-                        {project.thumbnail ? (
-                          <img src={project.thumbnail.src} alt={project.title} />
-                        ) : null}
-                        <img
-                          className="related-project__arrow"
-                          src={projectArrow}
-                          alt=""
-                        />
-                      </div>
-                      <div>
-                        <h2>{project.title}</h2>
-                        <p>{project.categoryLabel}</p>
-                      </div>
-                    </Link>
-                  ))}
+              {relatedWorks.length > 0 && !isMobile ? (
+                <div className="work-detail-related-wrap" data-work-detail-reveal>
+                  <RelatedWorks relatedWorks={relatedWorks} work={work} />
                 </div>
               ) : null}
             </div>
