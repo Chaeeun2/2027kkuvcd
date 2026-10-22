@@ -687,6 +687,21 @@ textarea.admin-input {
   object-fit: cover;
 }
 
+/* ABOUT 졸업준비위원회·작품지도 교수님 그래픽은 원본 비율 그대로 본다. */
+.admin-thumb--natural {
+  width: auto;
+  max-width: calc(var(--admin-thumb-width) * 2.4);
+  height: auto;
+  max-height: 280px;
+  aspect-ratio: unset;
+  object-fit: contain;
+}
+
+.admin-thumb--natural.admin-thumb--empty {
+  width: var(--admin-thumb-width);
+  min-height: 80px;
+}
+
 .admin-thumb--empty {
   display: flex;
   align-items: center;

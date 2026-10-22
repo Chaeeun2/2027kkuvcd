@@ -159,7 +159,11 @@ function AboutManager() {
         </EditorSection>
 
         <EditorSection title="졸업준비위원회">
-          <ImageField label="이미지" {...imageField("contributorImage")} />
+          <ImageField
+            label="이미지"
+            thumbShape="natural"
+            {...imageField("contributorImage")}
+          />
           <RowListField
             addLabel="위원 추가"
             columns={[
@@ -175,7 +179,11 @@ function AboutManager() {
         </EditorSection>
 
         <EditorSection title="작품지도 교수님">
-          <ImageField label="이미지" {...imageField("facultyImage")} />
+          <ImageField
+            label="이미지"
+            thumbShape="natural"
+            {...imageField("facultyImage")}
+          />
           <FacultyEditor {...field("faculty")} />
         </EditorSection>
 
