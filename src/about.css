@@ -5,7 +5,6 @@
    */
   --about-unit: min(1px, 100vw / 1440);
   --about-page-width: calc(1440 * var(--about-unit));
-  --about-hero-height: 100dvh;
   --about-content-width: var(--page-content-width);
   --about-section-padding: var(--page-gutter);
   --about-font-size-body: 16px;
@@ -33,13 +32,17 @@
   margin: 0 auto;
 }
 
+.about-intro-hero {
+  position: relative;
+  width: 100vw;
+  margin-right: calc(50% - 50vw);
+  margin-left: calc(50% - 50vw);
+}
+
 .about-intro-background {
   position: absolute;
   z-index: 0;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: var(--about-hero-height);
+  inset: 0;
   overflow: hidden;
   opacity: 0.2;
 }
@@ -59,13 +62,17 @@
   opacity: 1;
 }
 
+.about-layout-body {
+  position: relative;
+}
+
 .about-page-background {
   position: absolute;
   z-index: 0;
-  top: var(--about-hero-height);
+  top: 0;
   bottom: 0;
-  left: 0;
-  width: 100%;
+  left: calc(50% - 50vw);
+  width: 100vw;
   overflow: hidden;
   pointer-events: none;
 }
@@ -80,6 +87,8 @@
 
 .about-intro {
   --about-intro-content-height: calc(584 * var(--about-unit));
+  position: relative;
+  z-index: 1;
   display: flex;
   width: min(
     var(--about-content-width),
@@ -91,11 +100,11 @@
   gap: calc(65 * var(--about-unit));
   margin: 0 auto;
   /*
-   * 세로 여백은 위·아래 대칭(최소 하단 180px). 위는 헤더+50px보다 작지 않게.
+   * 세로 여백은 위·아래 대칭(최소 하단 150px). 위는 헤더+50px보다 작지 않게.
    * 콘텐츠가 길면 min-height(100dvh)보다 섹션이 길어진다.
    */
   --about-intro-vertical-pad: max(
-    180px,
+    150px,
     calc((100dvh - var(--about-intro-content-height)) / 2)
   );
   padding-top: max(
@@ -596,6 +605,12 @@
 
   .about-layout {
     width: 100%;
+  }
+
+  .about-intro-hero {
+    width: auto;
+    margin-right: 0;
+    margin-left: 0;
   }
 
   /*

@@ -202,13 +202,11 @@ function AboutPageContent({ content }) {
   return (
     <main className="about-page" ref={pageRef}>
       <Header reveal />
-      <IntroBackground images={content.backgrounds} />
-      <div className="about-page-background" aria-hidden="true">
-        <img src={aboutBg} alt="" />
-      </div>
 
       <div className="about-layout">
-        <section className="about-intro">
+        <div className="about-intro-hero">
+          <IntroBackground images={content.backgrounds} />
+          <section className="about-intro">
           <img
             className="about-intro-image"
             src={resolveImageSrc(content.introImage.src)}
@@ -261,7 +259,13 @@ function AboutPageContent({ content }) {
               </>
             ) : null}
           </div>
-        </section>
+          </section>
+        </div>
+
+        <div className="about-layout-body">
+          <div className="about-page-background" aria-hidden="true">
+            <img src={aboutBg} alt="" />
+          </div>
 
         <section
           className="about-section-two"
@@ -403,6 +407,7 @@ function AboutPageContent({ content }) {
             ))}
           </div>
         </section>
+        </div>
       </div>
 
       <Footer />
