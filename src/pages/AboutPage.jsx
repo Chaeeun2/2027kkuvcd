@@ -11,7 +11,10 @@ import {
 import { resolveImageSrc } from "../content/defaultAssets";
 import usePageContent from "../content/usePageContent";
 import useIsMobile from "../hooks/useIsMobile";
+import ContentImage from "../components/ContentImage";
 import { scheduleReveal } from "../utils/loadingReveal";
+import { IMAGE_SIZES } from "../utils/optimizedImage";
+import { bindScrollReveal } from "../utils/scrollReveal";
 import "../about.css";
 
 const aboutBg = assetUrl("about_bg.jpg");
@@ -22,6 +25,12 @@ const factLabels = {
   ko: { hours: "시간", venue: "장소" },
   en: { hours: "Hours", venue: "Venue" },
 };
+
+function isDirectionalRevealReady(element) {
+  const bounds = element.getBoundingClientRect();
+  const triggerLine = window.innerHeight * 0.92;
+  return bounds.top <= triggerLine && bounds.bottom >= 0;
+}
 
 function useScrollReveal() {
   const pageRef = useRef(null);
@@ -36,13 +45,6 @@ function useScrollReveal() {
     const sectionTwoElements = [
       ...page.querySelectorAll("[data-section-two-item]"),
     ];
-    const directionalElements = new Set(
-      elements.filter(
-        (element) =>
-          element.hasAttribute("data-reveal-direction") &&
-          !element.hasAttribute("data-section-two-item"),
-      ),
-    );
 
     elements.forEach((element) => {
       element.style.setProperty(
@@ -58,25 +60,30 @@ function useScrollReveal() {
       });
 
       pendingReveals.add(cancel);
+      return cancel;
     };
 
-    const createObserver = (options) => {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
+    const cleanups = [
+      bindScrollReveal({
+        elements,
+        shouldObserve: (element) =>
+          !element.closest(".site-header") &&
+          !element.hasAttribute("data-section-two-trigger") &&
+          !element.hasAttribute("data-section-two-item") &&
+          !element.hasAttribute("data-reveal-direction"),
+        reveal: revealElement,
+      }),
+      bindScrollReveal({
+        elements,
+        shouldObserve: (element) =>
+          element.hasAttribute("data-reveal-direction") &&
+          !element.hasAttribute("data-section-two-item"),
+        shouldFlush: isDirectionalRevealReady,
+        useIntersectionObserver: false,
+        reveal: revealElement,
+      }),
+    ];
 
-          revealElement(entry.target);
-          observer.unobserve(entry.target);
-        });
-      }, options);
-
-      return observer;
-    };
-
-    const observer = createObserver({
-      threshold: 0.12,
-      rootMargin: "0px 0px -8% 0px",
-    });
     const sectionTwoObserver = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
@@ -84,46 +91,14 @@ function useScrollReveal() {
         sectionTwoElements.forEach((element) => revealElement(element));
         sectionTwoObserver.disconnect();
       },
-      { threshold: 0 },
+      { threshold: 0, rootMargin: "0px 0px 0px 0px" },
     );
-
-    elements.forEach((element) => {
-      if (
-        element.hasAttribute("data-section-two-trigger") ||
-        element.hasAttribute("data-section-two-item")
-      ) {
-        return;
-      }
-
-      if (element.hasAttribute("data-reveal-direction")) return;
-      observer.observe(element);
-    });
 
     if (sectionTwoTrigger) sectionTwoObserver.observe(sectionTwoTrigger);
 
-    const revealDirectionalElements = () => {
-      const triggerLine = window.innerHeight * 0.92;
-
-      directionalElements.forEach((element) => {
-        const bounds = element.getBoundingClientRect();
-        if (bounds.top > triggerLine || bounds.bottom < 0) return;
-
-        directionalElements.delete(element);
-        revealElement(element);
-      });
-    };
-
-    window.addEventListener("scroll", revealDirectionalElements, {
-      passive: true,
-    });
-    window.addEventListener("resize", revealDirectionalElements);
-    revealDirectionalElements();
-
     return () => {
-      observer.disconnect();
+      cleanups.forEach((cleanup) => cleanup());
       sectionTwoObserver.disconnect();
-      window.removeEventListener("scroll", revealDirectionalElements);
-      window.removeEventListener("resize", revealDirectionalElements);
       pendingReveals.forEach((cancel) => cancel());
     };
   }, []);
@@ -148,11 +123,15 @@ function IntroBackground({ images }) {
   return (
     <div className="about-intro-background" aria-hidden="true">
       {images.map((item, index) => (
-        <img
+        <ContentImage
           className={index === activeIndex % count ? "is-active" : ""}
           src={resolveImageSrc(item.src)}
+          width={IMAGE_SIZES.aboutBackground}
+          quality={75}
           alt=""
           key={item.id}
+          loading={index === 0 ? "eager" : "lazy"}
+          critical={index === 0}
         />
       ))}
     </div>
@@ -172,7 +151,12 @@ function PhotoStrip({ gallery }) {
     >
       <div className="about-gallery-track">
         {repeatedImages.map((image, index) => (
-          <img src={image} alt="" key={`${image}-${index}`} />
+          <ContentImage
+            src={image}
+            width={IMAGE_SIZES.aboutGallery}
+            alt=""
+            key={`${image}-${index}`}
+          />
         ))}
       </div>
     </section>
@@ -207,11 +191,15 @@ function AboutPageContent({ content }) {
         <div className="about-intro-hero">
           <IntroBackground images={content.backgrounds} />
           <section className="about-intro">
-          <img
+          <ContentImage
             className="about-intro-image"
             src={resolveImageSrc(content.introImage.src)}
+            width={IMAGE_SIZES.aboutIntro}
             alt=""
             data-reveal
+            loading="eager"
+            fetchPriority="high"
+            critical
           />
           <div className="about-intro-copy">
             <div>

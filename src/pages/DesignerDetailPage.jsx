@@ -13,7 +13,9 @@ import {
   loadWorks,
 } from "../content/worksContent";
 import useIsMobile from "../hooks/useIsMobile";
-import { scheduleReveal } from "../utils/loadingReveal";
+import ContentImage from "../components/ContentImage";
+import { IMAGE_SIZES } from "../utils/optimizedImage";
+import { bindScrollReveal, scheduleVisibleClass } from "../utils/scrollReveal";
 import "../designer-detail.css";
 
 const designerLine = assetUrl("designer-line.png");
@@ -38,31 +40,15 @@ function useDetailReveal() {
     if (!page) return undefined;
 
     const elements = [...page.querySelectorAll("[data-detail-reveal]")];
-    const pendingReveals = new Set();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
 
-          const delay = Number(entry.target.dataset.revealDelay ?? 0);
-          const cancel = scheduleReveal(() => {
-            entry.target.classList.add("is-visible");
-            pendingReveals.delete(cancel);
-          }, delay);
-
-          pendingReveals.add(cancel);
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.08, rootMargin: "0px 0px -8% 0px" },
-    );
-
-    elements.forEach((element) => observer.observe(element));
-
-    return () => {
-      observer.disconnect();
-      pendingReveals.forEach((cancel) => cancel());
-    };
+    return bindScrollReveal({
+      elements,
+      reveal: (element) =>
+        scheduleVisibleClass(
+          element,
+          Number(element.dataset.revealDelay ?? 0),
+        ),
+    });
   }, []);
 
   return pageRef;
@@ -114,7 +100,13 @@ function DesignerDetailContent({ designers, works }) {
             data-reveal-delay="80"
           >
             {headerImage ? (
-              <img src={headerImage} alt={`${displayKoreanName} 프로필`} />
+              <ContentImage
+                src={headerImage}
+                width={IMAGE_SIZES.designerProfile}
+                alt={`${displayKoreanName} 프로필`}
+                loading="eager"
+                critical
+              />
             ) : (
               <span>PROFILE IMAGE</span>
             )}
@@ -155,9 +147,13 @@ function DesignerDetailContent({ designers, works }) {
                 </div>
 
                 <div className="designer-detail-signature">
-                  {designer.signatureImage && (
-                    <img src={designer.signatureImage} alt="" />
-                  )}
+                  {designer.signatureImage ? (
+                    <ContentImage
+                      src={designer.signatureImage}
+                      width={480}
+                      alt=""
+                    />
+                  ) : null}
                 </div>
               </div>
             </section>
@@ -186,9 +182,10 @@ function DesignerDetailContent({ designers, works }) {
                   >
                     <div className="designer-project-image">
                       {project.image ? (
-                        <img
+                        <ContentImage
                           className="designer-project-thumbnail"
                           src={project.image}
+                          width={IMAGE_SIZES.designerProject}
                           alt={project.title}
                         />
                       ) : (

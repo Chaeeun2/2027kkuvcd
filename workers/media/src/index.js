@@ -78,6 +78,55 @@ async function requireAdmin(request, env) {
   if (!response.ok) throw new HttpError(403, "관리자 권한이 없습니다.");
 }
 
+function parseImageTransform(requestUrl) {
+  const params = new URL(requestUrl).searchParams;
+  const widthParam = params.get("w");
+  const qualityParam = params.get("q");
+  const formatParam = params.get("f")?.toLowerCase();
+
+  if (!widthParam && !qualityParam && !formatParam) return null;
+
+  const image = { fit: "scale-down" };
+
+  if (widthParam) {
+    const width = Number(widthParam);
+    if (Number.isFinite(width) && width > 0 && width <= 4096) {
+      image.width = Math.round(width);
+    }
+  }
+
+  if (qualityParam) {
+    const quality = Number(qualityParam);
+    if (Number.isFinite(quality) && quality >= 1 && quality <= 100) {
+      image.quality = Math.round(quality);
+    }
+  }
+
+  if (
+    formatParam === "auto" ||
+    formatParam === "webp" ||
+    formatParam === "avif" ||
+    formatParam === "jpeg" ||
+    formatParam === "png"
+  ) {
+    image.format = formatParam;
+  } else if (!formatParam && (widthParam || qualityParam)) {
+    image.format = "auto";
+  }
+
+  if (!image.width && !image.quality && !image.format) return null;
+  return image;
+}
+
+function isRasterImage(contentType) {
+  return (
+    contentType === "image/jpeg" ||
+    contentType === "image/png" ||
+    contentType === "image/webp" ||
+    contentType === "image/avif"
+  );
+}
+
 async function serveMedia(request, env, key) {
   const isHead = request.method === "HEAD";
   const object = isHead
@@ -88,13 +137,27 @@ async function serveMedia(request, env, key) {
   const headers = new Headers();
   object.writeHttpMetadata(headers);
   headers.set("ETag", object.httpEtag);
-  /* 키에 UUID가 들어가 같은 주소의 내용이 바뀌지 않으므로 길게 캐시한다. */
+  /* 키·쿼리(w,q,f)마다 URL이 달라지므로 각각 immutable 캐시 가능. */
   headers.set("Cache-Control", "public, max-age=31536000, immutable");
   headers.set("X-Content-Type-Options", "nosniff");
-  /* 폰트와 3D 모델은 CORS 요청으로 받으므로 공개 파일은 어느 출처에서나 읽게 한다. */
   headers.set("Access-Control-Allow-Origin", "*");
-  /* SVG 안의 스크립트가 이 주소에서 실행되지 않게 막는다. */
-  headers.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+  headers.set(
+    "Content-Security-Policy",
+    "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+  );
+
+  const contentType = (object.httpMetadata?.contentType ?? "application/octet-stream")
+    .split(";")[0]
+    .trim();
+  const transform = parseImageTransform(request.url);
+
+  if (!isHead && transform && isRasterImage(contentType)) {
+    headers.set("Vary", "Accept");
+    return new Response(object.body, {
+      cf: { image: transform },
+      headers,
+    });
+  }
 
   return new Response(isHead ? null : object.body, { headers });
 }

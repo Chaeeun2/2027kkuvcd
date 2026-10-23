@@ -5,6 +5,7 @@
    */
   --about-unit: min(1px, 100vw / 1440);
   --about-page-width: calc(1440 * var(--about-unit));
+  --about-layout-inset: max(0px, (100vw - var(--about-page-width)) / 2);
   --about-content-width: var(--page-content-width);
   --about-section-padding: var(--page-gutter);
   --about-font-size-body: 16px;
@@ -32,11 +33,15 @@
   margin: 0 auto;
 }
 
+/*
+ * 배경만 뷰포트 전체 너비. 본문(inset)은 about-layout 폭에 맞춘다.
+ * width: 100vw + margin breakout 은 스크롤바 때문에 좌우가 어긋날 수 있다.
+ */
 .about-intro-hero {
   position: relative;
-  width: 100vw;
-  margin-right: calc(50% - 50vw);
-  margin-left: calc(50% - 50vw);
+  margin-inline: calc((100% - 100vw) / 2);
+  padding-inline: calc((100vw - 100%) / 2);
+  box-sizing: border-box;
 }
 
 .about-intro-background {
@@ -62,8 +67,18 @@
   opacity: 1;
 }
 
+/*
+ * section-two margin-top은 intro-hero와 margin collapse 되어 layout-body 밖(#111)에
+ * 빈 칸이 생긴다. 같은 간격은 padding-top으로 두고 page 배경이 덮게 한다.
+ */
 .about-layout-body {
   position: relative;
+  padding-top: 160px;
+}
+
+.about-layout-body > :not(.about-page-background) {
+  position: relative;
+  z-index: 1;
 }
 
 .about-page-background {
@@ -90,18 +105,18 @@
   position: relative;
   z-index: 1;
   display: flex;
-  width: min(
+  width: fit-content;
+  max-width: min(
     var(--about-content-width),
-    100% - var(--about-section-padding) * 2
+    calc(100% - 2 * var(--about-section-padding))
   );
   box-sizing: border-box;
-  min-height: 100dvh;
   align-items: flex-start;
   gap: calc(65 * var(--about-unit));
   margin: 0 auto;
   /*
    * 세로 여백은 위·아래 대칭(최소 하단 150px). 위는 헤더+50px보다 작지 않게.
-   * 콘텐츠가 길면 min-height(100dvh)보다 섹션이 길어진다.
+   * min-height(100dvh)는 padding과 겹치며 flex 안에 빈 검은 칸이 생길 수 있어 쓰지 않는다.
    */
   --about-intro-vertical-pad: max(
     150px,
@@ -111,7 +126,8 @@
     calc(var(--header-height) + 50px),
     var(--about-intro-vertical-pad)
   );
-  padding-bottom: var(--about-intro-vertical-pad);
+  /* 하단 간격은 section-two margin-top + page 배경으로 둔다. intro 안 padding은 #111만 보인다. */
+  padding-bottom: 0;
 }
 
 .about-intro-image {
@@ -126,10 +142,10 @@
   width: auto;
   min-height: var(--about-intro-content-height);
   min-width: 0;
-  flex: 1 1 0;
+  flex: 0 1 auto;
   flex-direction: column;
   align-items: flex-start;
-  gap: 40px;
+  gap: 32px;
 }
 
 .about-intro-copy > div:first-child {
@@ -149,7 +165,7 @@
   font-family: var(--font-display);
   font-size: var(--about-font-size-title);
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1;
 }
 
 .about-intro h2 {
@@ -192,15 +208,23 @@
 }
 
 .about-section-two {
-  margin-top: 160px;
+  position: relative;
+  z-index: 1;
+  margin-top: 0;
 }
 
 .about-date-band {
+  --about-date-band-extra-left: max(
+    0px,
+    var(--about-layout-inset) - 437 * var(--about-unit)
+  );
   display: grid;
-  width: calc(1566.5 * var(--about-unit));
+  width: calc(1566.5 * var(--about-unit) + var(--about-date-band-extra-left));
   height: calc(92 * var(--about-unit));
   align-items: center;
-  margin-left: calc(-437 * var(--about-unit));
+  margin-left: calc(
+    -437 * var(--about-unit) - var(--about-date-band-extra-left)
+  );
 }
 
 .about-date-band img {
@@ -421,7 +445,6 @@
 
 .about-divider {
   position: static;
-  width: calc(1566.5 * var(--about-unit));
   height: calc(92 * var(--about-unit));
   overflow: hidden;
 }
@@ -435,15 +458,28 @@
   object-position: right center;
 }
 
+/*
+ * 1440 시안 위치(margin)는 유지하고, 넓은 화면에서만 한쪽으로 폭을 늘린다.
+ * one → 오른쪽 끝, two → 왼쪽 끝(왼쪽 여백이 생길 때 margin·width를 같이 보정).
+ */
 .about-divider-one {
   margin-top: 0;
   margin-left: calc(406 * var(--about-unit));
+  width: max(
+    calc(1566.5 * var(--about-unit)),
+    calc(100vw - var(--about-layout-inset) - 406 * var(--about-unit))
+  );
   transform: rotate(180deg) scaleY(-1);
 }
 
 .about-divider-two {
+  --about-divider-extra-left: max(
+    0px,
+    var(--about-layout-inset) - 533 * var(--about-unit)
+  );
   margin-top: 0;
-  margin-left: calc(-533 * var(--about-unit));
+  margin-left: calc(-533 * var(--about-unit) - var(--about-divider-extra-left));
+  width: calc(1566.5 * var(--about-unit) + var(--about-divider-extra-left));
 }
 
 .about-faculty {
@@ -518,23 +554,20 @@
 
 .about-page [data-reveal] {
   opacity: 0;
-  translate: 0 36px;
+  transform: translate3d(0, 36px, 0);
   transition:
     opacity 1100ms cubic-bezier(0.22, 1, 0.36, 1),
-    translate 1100ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 1100ms cubic-bezier(0.22, 1, 0.36, 1);
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, translate, transform;
+  backface-visibility: hidden;
 }
 
 .about-page [data-reveal-direction="from-right"] {
-  transform: rotate(0deg);
-  translate: 100vw 0;
+  transform: translate3d(100vw, 0, 0) rotate(0deg);
 }
 
 .about-page [data-reveal-direction="from-left"] {
-  transform: rotate(0deg);
-  translate: -100vw 0;
+  transform: translate3d(-100vw, 0, 0) rotate(0deg);
 }
 
 .about-page [data-reveal-direction] {
@@ -543,11 +576,22 @@
 
 .about-page [data-reveal].is-visible {
   opacity: 1;
-  translate: 0 0;
+  transform: translate3d(0, 0, 0);
 }
 
 .about-page [data-reveal-direction].is-visible {
-  transform: rotate(var(--reveal-rotate, 0deg));
+  transform: translate3d(0, 0, 0) rotate(var(--reveal-rotate, 0deg));
+}
+
+/*
+ * ABOUT만 Header에 reveal을 켠다. [data-reveal] 페이드/translateY가
+ * site-navigation의 translateX(100%) 드로어와 transform 하나로 충돌한다.
+ */
+.about-page .site-header [data-reveal] {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  transition-delay: 0ms;
 }
 
 @media (max-width: 1439px) and (min-width: 1080px) {
@@ -608,24 +652,22 @@
   }
 
   .about-intro-hero {
-    width: auto;
-    margin-right: 0;
-    margin-left: 0;
+    margin-inline: 0;
+    padding-inline: 0;
   }
 
-  /*
-   * 모바일 메뉴는 화면 밖에 숨어 있다가 열리는 드로어라 스크롤 리빌이 영원히
-   * 투명한 채로 남고, 리빌 transition이 드로어 슬라이드까지 덮어쓴다.
-   */
-  .about-page .site-navigation[data-reveal] {
-    opacity: 1;
-    translate: none;
+  .about-page .site-header .site-navigation[data-reveal] {
     transition:
       transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
       visibility 320ms;
   }
 
-  .about-page .site-navigation[data-reveal].is-open {
+  .about-page .site-header .site-navigation[data-reveal]:not(.is-open) {
+    transform: translateX(100%);
+  }
+
+  .about-page .site-header .site-navigation[data-reveal].is-open {
+    transform: translateX(0);
     transition:
       transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
       visibility 0s;
@@ -633,7 +675,6 @@
 
   /* 모바일 시안에서는 장식 그래픽을 쓰지 않는다. */
   .about-intro-background,
-  .about-page-background,
   .about-instagram,
   .about-info-card > img,
   .about-contributor-box,
@@ -649,12 +690,14 @@
     --about-intro-content-height: auto;
     flex-direction: column;
     align-items: stretch;
-    width: auto;
+    width: 100%;
+    max-width: none;
     height: auto;
     min-height: 0;
     gap: 30.3px;
     margin: 0;
     padding: 96.5px var(--page-gutter) 0;
+    box-sizing: border-box;
   }
 
   .about-intro-image {
@@ -674,7 +717,7 @@
   }
 
   .about-intro-copy > div:first-child {
-    gap: 1px;
+    gap: 10px;
   }
 
   .about-intro h2 {
@@ -688,7 +731,7 @@
   }
 
   .about-intro-description p {
-    width: calc(100% - 8px);
+    width: 100%;
     max-width: none;
     text-wrap: pretty;
   }
@@ -697,8 +740,8 @@
     margin-top: 11.1px;
   }
 
-  .about-section-two {
-    margin-top: 74.4px;
+  .about-layout-body {
+    padding-top: 74.4px;
   }
 
   /* 날짜·CONTRIBUTORS·SUPPORTS가 같은 띠 위에 올라간다. 띠는 화면 오른쪽 여백 앞에서 끝나고 글자는 화면 가운데에 둔다. */
@@ -910,11 +953,11 @@
 
   .about-page [data-reveal] {
     opacity: 1;
-    translate: none;
+    transform: none;
     transition: none;
   }
 
   .about-page [data-reveal-direction] {
-    transform: rotate(var(--reveal-rotate, 0deg));
+    transform: translate3d(0, 0, 0) rotate(var(--reveal-rotate, 0deg));
   }
 }

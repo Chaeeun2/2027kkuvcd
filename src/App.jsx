@@ -19,6 +19,7 @@ import {
   LOADING_REVEAL_DELAY_MS,
   releaseReveal,
 } from "./utils/loadingReveal";
+import { collectCriticalMedia, isMediaReady } from "./utils/mediaLoading";
 import { isPageContentPending, onPageContentReady } from "./utils/pageContent";
 
 /* 관리자 화면은 따로 묶어 방문자 화면 번들에 Firebase SDK가 실리지 않게 한다. */
@@ -29,17 +30,6 @@ const INTRO_LOADING_DURATION = 2000;
 const LOADING_FADE_TIME = 1500;
 const PROGRESS_SETTLE_TIME = 300;
 const MEDIA_WAIT_LIMIT = 20000;
-
-function isMediaReady(element) {
-  if (element instanceof HTMLVideoElement) {
-    return (
-      element.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA ||
-      element.error !== null
-    );
-  }
-
-  return element.complete;
-}
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -98,7 +88,7 @@ function MediaLoadingScreen() {
     let stopTracking = () => {};
 
     const trackMedia = () => {
-      const media = [...document.querySelectorAll("main img, main video")];
+      const media = collectCriticalMedia();
       const pending = media.filter((element) => !isMediaReady(element));
 
       if (pending.length === 0 && !isWaitingForContent) {

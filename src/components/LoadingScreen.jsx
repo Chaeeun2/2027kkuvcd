@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { assetUrl } from "../content/assetUrl";
 
 const logoUrl = assetUrl("logo.png");
@@ -10,6 +11,29 @@ function LoadingScreen({
   progress,
 }) {
   const isTracking = typeof progress === "number";
+  const hasCompletedFadeRef = useRef(false);
+
+  useEffect(() => {
+    hasCompletedFadeRef.current = false;
+  }, [isLeaving]);
+
+  useEffect(() => {
+    if (!isLeaving) return undefined;
+
+    const completeFade = () => {
+      if (hasCompletedFadeRef.current) return;
+      hasCompletedFadeRef.current = true;
+      onFadeComplete();
+    };
+
+    /*
+     * Windows 등에서 animationend가 누락되면 로딩 레이어가 남을 수 있어
+     * 페이드 길이에 맞춘 fallback을 둔다.
+     */
+    const fallbackTimer = window.setTimeout(completeFade, fadeDuration + 200);
+
+    return () => window.clearTimeout(fallbackTimer);
+  }, [fadeDuration, isLeaving, onFadeComplete]);
 
   return (
     <div
@@ -20,6 +44,8 @@ function LoadingScreen({
           event.currentTarget === event.target &&
           event.animationName === "loading-screen-fade-out"
         ) {
+          if (hasCompletedFadeRef.current) return;
+          hasCompletedFadeRef.current = true;
           onFadeComplete();
         }
       }}

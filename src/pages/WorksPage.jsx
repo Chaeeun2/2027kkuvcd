@@ -10,7 +10,7 @@ import usePageContent from "../content/usePageContent";
 import { getCachedWorks, loadWorks } from "../content/worksContent";
 import { workCategories, workWorlds } from "../data/works";
 import useIsMobile from "../hooks/useIsMobile";
-import { scheduleReveal } from "../utils/loadingReveal";
+import { bindScrollReveal, scheduleVisibleClass } from "../utils/scrollReveal";
 import "../works.css";
 
 const CARD_REVEAL_STEP = 80;
@@ -98,31 +98,12 @@ function WorksPageContent({ descriptions, works }) {
         "[data-work-reveal]:not(.is-visible)",
       ),
     ];
-    const pendingReveals = new Set();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
 
-          const delay = getWorkRevealDelay(entry.target);
-          const cancel = scheduleReveal(() => {
-            entry.target.classList.add("is-visible");
-            pendingReveals.delete(cancel);
-          }, delay);
-
-          pendingReveals.add(cancel);
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.01, rootMargin: "0px 0px -5% 0px" },
-    );
-
-    elements.forEach((element) => observer.observe(element));
-
-    return () => {
-      observer.disconnect();
-      pendingReveals.forEach((cancel) => cancel());
-    };
+    return bindScrollReveal({
+      elements,
+      reveal: (element) =>
+        scheduleVisibleClass(element, getWorkRevealDelay(element)),
+    });
   }, [filteredWorks]);
 
   return (

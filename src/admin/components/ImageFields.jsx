@@ -32,7 +32,9 @@ function useImageUpload({ folder, onUploaded, trackUpload }) {
     }
 
     setIsUploading(true);
-    const uploading = Promise.allSettled(files.map((file) => uploadImage(file, folder)));
+    const uploading = Promise.allSettled(
+      files.map((file) => uploadImage(file, folder)),
+    );
     trackUpload(uploading.then(fulfilledValues));
     const results = await uploading;
     setIsUploading(false);

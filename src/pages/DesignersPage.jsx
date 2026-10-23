@@ -7,7 +7,7 @@ import { getCachedDesigners, loadDesigners } from "../content/designersContent";
 import usePageContent from "../content/usePageContent";
 import { formatEnglishName } from "../data/designers";
 import useIsMobile from "../hooks/useIsMobile";
-import { scheduleReveal } from "../utils/loadingReveal";
+import { bindScrollReveal, scheduleVisibleClass } from "../utils/scrollReveal";
 import "../designers.css";
 
 const searchIcon = assetUrl("search-icon.svg");
@@ -42,43 +42,23 @@ function DesignersPageContent({ designers }) {
     const cards = [
       ...pageRef.current.querySelectorAll("[data-designer-card]"),
     ];
-    const pendingReveals = new Set();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
 
-          const grid = entry.target.parentElement;
-          const columnCount = getComputedStyle(grid)
-            .gridTemplateColumns.split(" ")
-            .filter(Boolean).length;
-          const index = [...grid.children].indexOf(entry.target);
-          entry.target.style.setProperty(
-            "--card-reveal-delay",
-            `${(index % Math.max(columnCount, 1)) * 80}ms`,
-          );
+    return bindScrollReveal({
+      elements: cards,
+      reveal: (card) => {
+        const grid = card.parentElement;
+        const columnCount = getComputedStyle(grid)
+          .gridTemplateColumns.split(" ")
+          .filter(Boolean).length;
+        const index = [...grid.children].indexOf(card);
+        card.style.setProperty(
+          "--card-reveal-delay",
+          `${(index % Math.max(columnCount, 1)) * 80}ms`,
+        );
 
-          const cancel = scheduleReveal(() => {
-            entry.target.classList.add("is-visible");
-            pendingReveals.delete(cancel);
-          });
-
-          pendingReveals.add(cancel);
-          observer.unobserve(entry.target);
-        });
+        return scheduleVisibleClass(card);
       },
-      {
-        threshold: 0.08,
-        rootMargin: "0px 0px -5% 0px",
-      },
-    );
-
-    cards.forEach((card) => observer.observe(card));
-
-    return () => {
-      observer.disconnect();
-      pendingReveals.forEach((cancel) => cancel());
-    };
+    });
   }, [visibleDesigners]);
 
   return (

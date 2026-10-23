@@ -40,16 +40,77 @@ export function validateImageFile(file) {
   }
 }
 
+const UPLOAD_MAX_EDGE = 2400;
+const UPLOAD_JPEG_QUALITY = 0.88;
+
+function loadImageFromFile(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error(`${file.name}: 이미지를 읽을 수 없습니다.`));
+    };
+    image.src = url;
+  });
+}
+
+/*
+ * 원본이 크면 업로드 전에 리사이즈·재압축한다. SVG/GIF는 그대로 둔다.
+ * Worker ?w= 변환과 함께 썸네일·상세 모두 전송량을 줄인다.
+ */
+export async function prepareImageForUpload(file) {
+  if (file.type === "image/svg+xml" || file.type === "image/gif") {
+    return file;
+  }
+
+  if (!file.type.startsWith("image/")) return file;
+
+  const image = await loadImageFromFile(file);
+  const longest = Math.max(image.naturalWidth, image.naturalHeight);
+  if (longest <= UPLOAD_MAX_EDGE && file.size <= 1_500_000) {
+    return file;
+  }
+
+  const scale = longest > UPLOAD_MAX_EDGE ? UPLOAD_MAX_EDGE / longest : 1;
+  const width = Math.max(1, Math.round(image.naturalWidth * scale));
+  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) return file;
+
+  context.drawImage(image, 0, 0, width, height);
+
+  const outputType =
+    file.type === "image/png" && file.size < 800_000 ? "image/png" : "image/jpeg";
+  const blob = await new Promise((resolve) => {
+    canvas.toBlob(resolve, outputType, UPLOAD_JPEG_QUALITY);
+  });
+
+  if (!blob || blob.size >= file.size) return file;
+
+  const extension = outputType === "image/png" ? ".png" : ".jpg";
+  const baseName = file.name.replace(/\.[^.]+$/, "");
+  return new File([blob], `${baseName}${extension}`, { type: outputType });
+}
+
 /* 반환값 { src, key }의 src는 Worker가 공개로 내려주는 이미지 주소다. */
 export async function uploadImage(file, folder) {
   validateImageFile(file);
+  const payload = await prepareImageForUpload(file);
 
   const response = await authorizedFetch(
     `/upload?folder=${encodeURIComponent(folder)}`,
     {
       method: "PUT",
-      headers: { "Content-Type": file.type },
-      body: file,
+      headers: { "Content-Type": payload.type },
+      body: payload,
     },
   );
   const { key, url } = await response.json();

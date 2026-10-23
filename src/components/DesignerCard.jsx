@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { formatEnglishName } from "../data/designers";
+import { IMAGE_SIZES } from "../utils/optimizedImage";
+import ContentImage from "./ContentImage";
 
 function DesignerCard({ designer, isMobile = false }) {
   const {
@@ -27,7 +29,11 @@ function DesignerCard({ designer, isMobile = false }) {
       <Link className="designer-card designer-card--portrait" {...commonProps}>
         <div className="designer-card__photo">
           {profileImage ? (
-            <img src={profileImage} alt="" />
+            <ContentImage
+              src={profileImage}
+              width={IMAGE_SIZES.designerCard}
+              alt=""
+            />
           ) : (
             <span>PROFILE IMAGE</span>
           )}
@@ -47,7 +53,11 @@ function DesignerCard({ designer, isMobile = false }) {
         <div
           className={`designer-card__face designer-card__front designer-card__front--${colorScheme}`}
         >
-          <img src={frontImage} alt="" />
+          <ContentImage
+            src={frontImage}
+            width={IMAGE_SIZES.designerCard}
+            alt=""
+          />
           <div className="designer-card__front-body">
             <p className="designer-card__korean-name">{koreanName}</p>
             <p className="designer-card__english-name">{englishName}</p>
@@ -58,7 +68,7 @@ function DesignerCard({ designer, isMobile = false }) {
           className="designer-card__face designer-card__back"
           aria-hidden="true"
         >
-          <img src={backImage} alt="" />
+          <ContentImage src={backImage} width={IMAGE_SIZES.designerCard} alt="" />
         </div>
       </div>
     </Link>

@@ -51,16 +51,17 @@
   outline: none;
   opacity: 0;
   perspective: 1200px;
-  translate: 0 32px;
+  transform: translate3d(0, 32px, 0);
   transition:
     opacity 1000ms cubic-bezier(0.22, 1, 0.36, 1),
-    translate 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
   transition-delay: var(--card-reveal-delay, 0ms);
+  backface-visibility: hidden;
 }
 
 .designer-card.is-visible {
   opacity: 1;
-  translate: 0 0;
+  transform: translate3d(0, 0, 0);
 }
 
 .designer-card__inner {
@@ -282,7 +283,7 @@
 @media (prefers-reduced-motion: reduce) {
   .designer-card {
     opacity: 1;
-    translate: none;
+    transform: none;
     transition: none;
   }
 

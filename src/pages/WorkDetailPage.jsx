@@ -13,7 +13,9 @@ import {
 } from "../content/worksContent";
 import useIsMobile from "../hooks/useIsMobile";
 import { workCategories, workWorlds } from "../data/works";
-import { scheduleReveal } from "../utils/loadingReveal";
+import ContentImage from "../components/ContentImage";
+import { IMAGE_SIZES } from "../utils/optimizedImage";
+import { bindScrollReveal, scheduleVisibleClass } from "../utils/scrollReveal";
 import "../works.css";
 import "../work-detail.css";
 
@@ -24,7 +26,11 @@ function RelatedProject({ project }) {
     <Link className="related-project" to={`/works/${project.id}`}>
       <div className="related-project__thumbnail">
         {project.thumbnail?.src ? (
-          <img src={project.thumbnail.src} alt={project.title} />
+          <ContentImage
+            src={project.thumbnail.src}
+            width={IMAGE_SIZES.workRelated}
+            alt={project.title}
+          />
         ) : null}
         <img className="related-project__arrow" src={projectArrow} alt="" />
       </div>
@@ -91,29 +97,11 @@ function WorkDetailContent({ works }) {
     if (!page) return undefined;
 
     const elements = [...page.querySelectorAll("[data-work-detail-reveal]")];
-    const pendingReveals = new Set();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
 
-          const cancel = scheduleReveal(() => {
-            entry.target.classList.add("is-visible");
-            pendingReveals.delete(cancel);
-          });
-
-          pendingReveals.add(cancel);
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.01, rootMargin: "0px 0px -5% 0px" },
-    );
-
-    elements.forEach((element) => observer.observe(element));
-    return () => {
-      observer.disconnect();
-      pendingReveals.forEach((cancel) => cancel());
-    };
+    return bindScrollReveal({
+      elements,
+      reveal: (element) => scheduleVisibleClass(element),
+    });
   }, [workId]);
 
   if (!work) return <Navigate to="/works" replace />;
@@ -193,13 +181,21 @@ function WorkDetailContent({ works }) {
           </aside>
 
           <div className="work-detail-gallery">
-            {work.gallery.map((image) => (
+            {work.gallery.map((image, index) => (
               <div
                 className={`work-detail-gallery-image${image.src ? "" : " is-empty"}`}
                 data-work-detail-reveal
                 key={image.id}
               >
-                {image.src ? <img src={image.src} alt={`${work.title} 상세 이미지`} /> : null}
+                {image.src ? (
+                  <ContentImage
+                    src={image.src}
+                    width={IMAGE_SIZES.workGallery}
+                    alt={`${work.title} 상세 이미지`}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    critical={index === 0}
+                  />
+                ) : null}
               </div>
             ))}
           </div>

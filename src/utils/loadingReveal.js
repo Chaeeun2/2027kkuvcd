@@ -6,6 +6,7 @@ export const LOADING_REVEAL_DELAY_MS = 900;
  */
 let isHolding = false;
 const waitingStarts = new Set();
+const releaseListeners = new Set();
 
 export function holdReveal() {
   isHolding = true;
@@ -16,6 +17,12 @@ export function releaseReveal() {
   const starts = [...waitingStarts];
   waitingStarts.clear();
   starts.forEach((start) => start());
+  releaseListeners.forEach((listener) => listener());
+}
+
+export function onRevealReleased(listener) {
+  releaseListeners.add(listener);
+  return () => releaseListeners.delete(listener);
 }
 
 export function scheduleReveal(callback, delay = 0) {

@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import ContentImage from "./ContentImage";
+import { IMAGE_SIZES } from "../utils/optimizedImage";
 
 function WorkCard({ work }) {
   return (
@@ -9,9 +11,10 @@ function WorkCard({ work }) {
     >
       <div className="work-card__thumbnail">
         {work.thumbnail ? (
-          <img
+          <ContentImage
             className="work-card__image"
             src={work.thumbnail.src}
+            width={IMAGE_SIZES.workCard}
             alt={`${work.title} 작품`}
           />
         ) : null}

@@ -277,9 +277,22 @@ a {
 }
 
 .loading-screen.is-leaving {
+  -webkit-animation: loading-screen-fade-out var(--loading-fade-duration, 1.5s)
+    ease forwards;
   animation: loading-screen-fade-out var(--loading-fade-duration, 1.5s) ease
     forwards;
   pointer-events: none;
+  will-change: opacity;
+}
+
+@-webkit-keyframes loading-screen-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes loading-screen-fade-out {
