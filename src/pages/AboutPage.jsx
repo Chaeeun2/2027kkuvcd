@@ -189,7 +189,7 @@ function AboutPageContent({ content }) {
 
       <div className="about-layout">
         <div className="about-intro-hero">
-          <IntroBackground images={content.backgrounds} />
+          {!isMobile ? <IntroBackground images={content.backgrounds} /> : null}
           <section className="about-intro">
           <ContentImage
             className="about-intro-image"
@@ -251,9 +251,11 @@ function AboutPageContent({ content }) {
         </div>
 
         <div className="about-layout-body">
-          <div className="about-page-background" aria-hidden="true">
-            <img src={aboutBg} alt="" />
-          </div>
+          {!isMobile ? (
+            <div className="about-page-background" aria-hidden="true">
+              <img src={aboutBg} alt="" />
+            </div>
+          ) : null}
 
         <section
           className="about-section-two"

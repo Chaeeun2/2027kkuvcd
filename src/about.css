@@ -673,8 +673,9 @@
       visibility 0s;
   }
 
-  /* 모바일 시안에서는 장식 그래픽을 쓰지 않는다. */
+  /* 모바일 시안에서는 장식 그래픽·전체 배경을 쓰지 않는다. */
   .about-intro-background,
+  .about-page-background,
   .about-instagram,
   .about-info-card > img,
   .about-contributor-box,
