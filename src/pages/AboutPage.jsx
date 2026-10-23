@@ -11,6 +11,7 @@ import {
 import { resolveImageSrc } from "../content/defaultAssets";
 import usePageContent from "../content/usePageContent";
 import useIsMobile from "../hooks/useIsMobile";
+import AboutGallery from "../components/AboutGallery";
 import ContentImage from "../components/ContentImage";
 import { scheduleReveal } from "../utils/loadingReveal";
 import { IMAGE_SIZES } from "../utils/optimizedImage";
@@ -138,31 +139,6 @@ function IntroBackground({ images }) {
   );
 }
 
-/* 같은 사진 묶음을 두 번 이어 붙여, 절반만큼 흘러가면 처음으로 돌아가도 끊김이 없다. */
-function PhotoStrip({ gallery }) {
-  const images = gallery.map((item) => resolveImageSrc(item.src));
-  const repeatedImages = [...images, ...images];
-
-  return (
-    <section
-      className="about-gallery"
-      aria-label="전시 준비 사진"
-      data-reveal
-    >
-      <div className="about-gallery-track">
-        {repeatedImages.map((image, index) => (
-          <ContentImage
-            src={image}
-            width={IMAGE_SIZES.aboutGallery}
-            alt=""
-            key={`${image}-${index}`}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
 /* 콘텐츠가 오기 전에는 빈 페이지를 두고, 로딩 화면이 그동안 화면을 덮는다. */
 function AboutPage() {
   const content = usePageContent(getCachedAboutContent, loadAboutContent);
@@ -273,10 +249,14 @@ function AboutPageContent({ content }) {
 
           <div
             className="about-info-card"
-            data-reveal
-            data-reveal-delay="300"
-            data-reveal-direction="from-right"
-            data-section-two-item
+            {...(!isMobile
+              ? {
+                  "data-reveal": true,
+                  "data-reveal-delay": "300",
+                  "data-reveal-direction": "from-right",
+                  "data-section-two-item": true,
+                }
+              : {})}
           >
             <img src={infoCard} alt="" />
             <div className="about-info-card-content">
@@ -290,13 +270,17 @@ function AboutPageContent({ content }) {
               </div>
               {isMobile ? (
                 <dl className="about-info-facts">
-                  <div className="about-info-fact">
+                  <div className="about-info-fact" data-reveal>
                     <dt>{labels.hours}</dt>
                     <dd>
                       <MultilineText text={content.hours} />
                     </dd>
                   </div>
-                  <div className="about-info-fact">
+                  <div
+                    className="about-info-fact"
+                    data-reveal
+                    data-reveal-delay="80"
+                  >
                     <dt>{labels.venue}</dt>
                     <dd>
                       <MultilineText text={content.venue[language]} />
@@ -320,7 +304,7 @@ function AboutPageContent({ content }) {
           </div>
         </section>
 
-        <PhotoStrip gallery={content.gallery} />
+        <AboutGallery gallery={content.gallery} />
 
         <section className="about-contributors">
           <h2 data-reveal>CONTRIBUTORS</h2>
