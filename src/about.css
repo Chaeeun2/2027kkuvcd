@@ -111,12 +111,13 @@
     calc(100% - 2 * var(--about-section-padding))
   );
   box-sizing: border-box;
+  min-height: 100dvh;
   align-items: flex-start;
   gap: calc(65 * var(--about-unit));
   margin: 0 auto;
   /*
    * 세로 여백은 위·아래 대칭(최소 하단 150px). 위는 헤더+50px보다 작지 않게.
-   * min-height(100dvh)는 padding과 겹치며 flex 안에 빈 검은 칸이 생길 수 있어 쓰지 않는다.
+   * 2섹션 위 page 배경 간격은 layout-body padding-top(별도).
    */
   --about-intro-vertical-pad: max(
     150px,
@@ -126,8 +127,7 @@
     calc(var(--header-height) + 50px),
     var(--about-intro-vertical-pad)
   );
-  /* 하단 간격은 section-two margin-top + page 배경으로 둔다. intro 안 padding은 #111만 보인다. */
-  padding-bottom: 0;
+  padding-bottom: var(--about-intro-vertical-pad);
 }
 
 .about-intro-image {
