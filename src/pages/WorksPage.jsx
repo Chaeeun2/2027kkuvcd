@@ -48,7 +48,7 @@ function getWorkRevealDelay(element) {
 
 function WorkGrid({ items, threeColumns = false }) {
   if (items.length === 0) {
-    return <p className="works-empty">해당 카테고리의 작품이 없습니다.</p>;
+    return <p className="works-empty">해당 분류의 작품이 없습니다.</p>;
   }
 
   return (

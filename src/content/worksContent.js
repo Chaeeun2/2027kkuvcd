@@ -52,7 +52,7 @@ export function normalizeWork(data) {
 }
 
 /*
- * 화면에 쓰기 좋게 디자이너 이름과 카테고리 이름을 붙인다.
+ * 화면에 쓰기 좋게 디자이너 이름과 분류 이름을 붙인다.
  * 삭제된 디자이너는 작품에서 빠진다.
  */
 function toWorkView(id, work, designersById, koreanCategoryLabels) {

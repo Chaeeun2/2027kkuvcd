@@ -75,10 +75,7 @@ function WorksManager() {
   const categoryLabels = useMemo(
     () =>
       Object.fromEntries(
-        PRIMARY_WORK_CATEGORY_IDS.map((id) => [
-          id,
-          `${labelMap[id].ko} (${labelMap[id].en})`,
-        ]),
+        PRIMARY_WORK_CATEGORY_IDS.map((id) => [id, labelMap[id].ko]),
       ),
     [labelMap],
   );
@@ -218,12 +215,12 @@ function WorksManager() {
               value={search}
             />
             <select
-              aria-label="카테고리"
+              aria-label="분류"
               className="admin-input admin-toolbar__select"
               onChange={(event) => setCategory(event.target.value)}
               value={category}
             >
-              <option value="all">모든 카테고리</option>
+              <option value="all">모든 분류</option>
               {Object.entries(categoryFilterOptions).map(([id, label]) => (
                 <option key={id} value={id}>
                   {label}
@@ -268,7 +265,7 @@ function WorksManager() {
                 <span>썸네일</span>
                 <span>작품명</span>
                 <span>디자이너</span>
-                <span>카테고리</span>
+                <span>분류</span>
                 <span>이념</span>
                 <span>상태</span>
                 <span />

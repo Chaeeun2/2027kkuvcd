@@ -47,7 +47,7 @@ function WorksFilters({
   const categoryGroupRef = useRef(null);
   const activeCategoryId = toIds(category)[0];
 
-  /* 하위 카테고리 박스를 선택된 상위 카테고리의 왼쪽 끝에 맞춘다. */
+  /* 하위 분류 박스를 선택된 상위 분류의 왼쪽 끝에 맞춘다. */
   useLayoutEffect(() => {
     const filters = filtersRef.current;
     const group = categoryGroupRef.current;
@@ -71,7 +71,7 @@ function WorksFilters({
       const offset = Math.min(buttonOffset, maxOffset);
       filters.style.setProperty("--world-filter-offset", `${offset}px`);
 
-      // 모바일에서 마지막 카테고리까지 왼쪽 끝으로 스크롤될 만큼 뒤에 여백을 둔다.
+      // 모바일에서 마지막 분류까지 왼쪽 끝으로 스크롤될 만큼 뒤에 여백을 둔다.
       const lastButton = group.lastElementChild;
       const scrollEnd = Math.max(
         0,
@@ -92,7 +92,7 @@ function WorksFilters({
     return () => resizeObserver.disconnect();
   }, [activeCategoryId, categories]);
 
-  /* 모바일에서는 선택된 상위 카테고리를 가로 스크롤 영역의 왼쪽 끝으로 옮긴다. */
+  /* 모바일에서는 선택된 상위 분류를 가로 스크롤 영역의 왼쪽 끝으로 옮긴다. */
   const hasScrolledRef = useRef(false);
 
   useLayoutEffect(() => {
@@ -125,14 +125,14 @@ function WorksFilters({
       <FilterGroup
         groupRef={categoryGroupRef}
         items={categories}
-        label="상위 카테고리"
+        label="상위 분류"
         onChange={onCategoryChange}
         selected={category}
       />
       <div className="works-world-filter">
         <FilterGroup
           items={worlds}
-          label="하위 카테고리"
+          label="하위 분류"
           onChange={onWorldChange}
           selected={world}
         />

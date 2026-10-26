@@ -232,7 +232,7 @@
     margin-bottom: 40px;
   }
 
-  /* 카테고리는 화면 폭을 넘기므로 오른쪽 여백까지 흘려 보내고 가로로 스크롤한다. */
+  /* 상위 분류는 화면 폭을 넘기므로 오른쪽 여백까지 흘려 보내고 가로로 스크롤한다. */
   .works-filters > .works-filter-group {
     width: calc(100% + var(--page-gutter));
     gap: 16px;

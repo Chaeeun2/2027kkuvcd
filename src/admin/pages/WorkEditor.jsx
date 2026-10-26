@@ -28,7 +28,7 @@ function validateWork(work) {
   if (work.designerIds.length === 0)
     return "공개하려면 디자이너를 한 명 이상 골라 주세요.";
   if (work.categoryIds.length === 0)
-    return "공개하려면 카테고리를 하나 이상 골라 주세요.";
+    return "공개하려면 분류를 하나 이상 골라 주세요.";
   if (!work.worldType) return "공개하려면 이념을 골라 주세요.";
   return null;
 }
@@ -99,7 +99,7 @@ function WorkEditor({ workId }) {
             {...field("designerIds")}
           />
           <ChoiceField
-            label="카테고리"
+            label="분류"
             multiple
             options={categoryOptions}
             {...field("categoryIds")}

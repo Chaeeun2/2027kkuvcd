@@ -8,7 +8,7 @@ export const workCategories = [
   { id: "installation", label: "INSTALLATION" },
 ];
 
-/** 예전 카테고리 id → 현재 id (URL·저장 데이터 호환) */
+/** 예전 분류 id → 현재 id (URL·저장 데이터 호환) */
 export const legacyWorkCategoryIds = {
   experiment: "installation",
 };
@@ -49,7 +49,7 @@ export const workWorlds = [
   },
 ];
 
-/* 작품 상세와 디자이너 페이지에 보이는 카테고리 이름 */
+/* 작품 상세와 디자이너 페이지에 보이는 분류 이름 */
 export const categoryLabels = {
   branding: "브랜딩",
   media: "미디어",
