@@ -8,7 +8,11 @@ import WorksFilters from "../components/WorksFilters";
 import { getCachedAboutContent, loadAboutContent } from "../content/aboutContent";
 import usePageContent from "../content/usePageContent";
 import { getCachedWorks, loadWorks } from "../content/worksContent";
-import { workCategories, workWorlds } from "../data/works";
+import {
+  legacyWorkCategoryIds,
+  workCategories,
+  workWorlds,
+} from "../data/works";
 import useIsMobile from "../hooks/useIsMobile";
 import { bindScrollReveal, scheduleVisibleClass } from "../utils/scrollReveal";
 import "../works.css";
@@ -67,8 +71,10 @@ function WorksPageContent({ descriptions, works }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get("category");
   const worldParam = searchParams.get("world");
-  const category = workCategories.some((item) => item.id === categoryParam)
-    ? categoryParam
+  const resolvedCategoryParam =
+    legacyWorkCategoryIds[categoryParam] ?? categoryParam;
+  const category = workCategories.some((item) => item.id === resolvedCategoryParam)
+    ? resolvedCategoryParam
     : "all";
   const world = workWorlds.some((item) => item.id === worldParam)
     ? worldParam

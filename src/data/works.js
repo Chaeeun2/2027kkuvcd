@@ -5,8 +5,13 @@ export const workCategories = [
   { id: "branding", label: "BRANDING" },
   { id: "media", label: "MEDIA" },
   { id: "editorial", label: "EDITORIAL" },
-  { id: "experiment", label: "EXPERIMENT" },
+  { id: "installation", label: "INSTALLATION" },
 ];
+
+/** 예전 카테고리 id → 현재 id (URL·저장 데이터 호환) */
+export const legacyWorkCategoryIds = {
+  experiment: "installation",
+};
 
 export const workWorlds = [
   { id: "all", label: "All" },
@@ -49,7 +54,7 @@ export const categoryLabels = {
   branding: "브랜딩",
   media: "미디어",
   editorial: "편집",
-  experiment: "실험",
+  installation: "설치",
 };
 
 const categoryIds = Object.keys(categoryLabels);

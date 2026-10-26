@@ -1,5 +1,10 @@
 import { defaultDesigners } from "../data/designers";
-import { categoryLabels, placeholderWorks, workWorlds } from "../data/works";
+import {
+  categoryLabels,
+  legacyWorkCategoryIds,
+  placeholderWorks,
+  workWorlds,
+} from "../data/works";
 import createCachedLoader from "./cachedLoader";
 import { loadDesigners } from "./designersContent";
 import { queryFirestoreCollection } from "./firestoreRest";
@@ -10,8 +15,12 @@ export const WORKS_COLLECTION = "works";
 const categoryIds = new Set(Object.keys(categoryLabels));
 const worldIds = new Set(workWorlds.slice(1).map((world) => world.id));
 
-const knownIds = (value, known) =>
-  Array.isArray(value) ? value.filter((id) => known.has(id)) : [];
+const normalizeCategoryIds = (value, known) => {
+  if (!Array.isArray(value)) return [];
+
+  const ids = value.map((id) => legacyWorkCategoryIds[id] ?? id);
+  return [...new Set(ids.filter((id) => known.has(id)))];
+};
 
 /* 예전 문서는 { layout, images } 줄 단위라 줄 안의 이미지를 순서대로 펼친다. */
 function normalizeGallery(value) {
@@ -28,7 +37,7 @@ export function normalizeWork(data) {
     title: text(data?.title, ""),
     designerIds: Array.isArray(data?.designerIds) ? data.designerIds.filter(isText) : [],
     thumbnail: image(data?.thumbnail),
-    categoryIds: knownIds(data?.categoryIds, categoryIds),
+    categoryIds: normalizeCategoryIds(data?.categoryIds, categoryIds),
     worldType: worldIds.has(data?.worldType) ? data.worldType : "",
     description: bilingual(data?.description, { ko: "", en: "" }),
     gallery: normalizeGallery(data?.gallery),
