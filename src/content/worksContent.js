@@ -1,5 +1,9 @@
 import { defaultDesigners } from "../data/designers";
 import {
+  getDefaultWorkCategoryLabelMap,
+  getKoreanCategoryLabels,
+} from "../data/workCategoryLabels";
+import {
   categoryLabels,
   legacyWorkCategoryIds,
   placeholderWorks,
@@ -7,6 +11,7 @@ import {
 } from "../data/works";
 import createCachedLoader from "./cachedLoader";
 import { loadDesigners } from "./designersContent";
+import { loadWorkCategoryLabelMap } from "./workCategoriesContent";
 import { queryFirestoreCollection } from "./firestoreRest";
 import { bilingual, image, isText, text } from "./normalize";
 
@@ -50,7 +55,7 @@ export function normalizeWork(data) {
  * 화면에 쓰기 좋게 디자이너 이름과 카테고리 이름을 붙인다.
  * 삭제된 디자이너는 작품에서 빠진다.
  */
-function toWorkView(id, work, designersById) {
+function toWorkView(id, work, designersById, koreanCategoryLabels) {
   const designerIds = work.designerIds.filter((designerId) => designersById.has(designerId));
 
   return {
@@ -61,35 +66,64 @@ function toWorkView(id, work, designersById) {
       id: designerId,
       name: designersById.get(designerId).koreanName,
     })),
-    categoryLabel: work.categoryIds.map((categoryId) => categoryLabels[categoryId]).join(" · "),
+    categoryLabel: work.categoryIds
+      .map(
+        (categoryId) =>
+          koreanCategoryLabels[categoryId] ?? categoryLabels[categoryId] ?? categoryId,
+      )
+      .join(" · "),
   };
 }
 
 const toDesignerMap = (designers) =>
   new Map(designers.map((designer) => [designer.id, designer]));
 
+const defaultKoreanCategoryLabels = getKoreanCategoryLabels(
+  getDefaultWorkCategoryLabelMap(),
+);
+
 const placeholderWorkViews = placeholderWorks.map((work) =>
-  toWorkView(work.id, work, toDesignerMap(defaultDesigners)),
+  toWorkView(
+    work.id,
+    work,
+    toDesignerMap(defaultDesigners),
+    defaultKoreanCategoryLabels,
+  ),
 );
 
 async function fetchPublishedWorks() {
-  const [designers, documents] = await Promise.all([
+  const [designers, documents, labelMap] = await Promise.all([
     loadDesigners(),
     queryFirestoreCollection(WORKS_COLLECTION, {
       where: { field: "published", value: true },
     }),
+    loadWorkCategoryLabelMap(),
   ]);
+  const koreanCategoryLabels = getKoreanCategoryLabels(labelMap);
   const designersById = toDesignerMap(designers);
   if (documents.length === 0) {
-    return placeholderWorks.map((work) => toWorkView(work.id, work, designersById));
+    return placeholderWorks.map((work) =>
+      toWorkView(work.id, work, designersById, koreanCategoryLabels),
+    );
   }
 
   return documents
-    .map((document) => toWorkView(document.id, normalizeWork(document), designersById))
+    .map((document) =>
+      toWorkView(
+        document.id,
+        normalizeWork(document),
+        designersById,
+        koreanCategoryLabels,
+      ),
+    )
     .sort((a, b) => a.order - b.order);
 }
 
-export const { getCached: getCachedWorks, load: loadWorks } = createCachedLoader(
+export const {
+  getCached: getCachedWorks,
+  invalidate: invalidateWorks,
+  load: loadWorks,
+} = createCachedLoader(
   fetchPublishedWorks,
   placeholderWorkViews,
 );

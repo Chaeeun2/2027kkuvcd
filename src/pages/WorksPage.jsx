@@ -7,12 +7,12 @@ import WorkCard from "../components/WorkCard";
 import WorksFilters from "../components/WorksFilters";
 import { getCachedAboutContent, loadAboutContent } from "../content/aboutContent";
 import usePageContent from "../content/usePageContent";
-import { getCachedWorks, loadWorks } from "../content/worksContent";
 import {
-  legacyWorkCategoryIds,
-  workCategories,
-  workWorlds,
-} from "../data/works";
+  getCachedWorkCategoryFilters,
+  loadWorkCategoryFilters,
+} from "../content/workCategoriesContent";
+import { getCachedWorks, loadWorks } from "../content/worksContent";
+import { legacyWorkCategoryIds, workCategories, workWorlds } from "../data/works";
 import useIsMobile from "../hooks/useIsMobile";
 import { bindScrollReveal, scheduleVisibleClass } from "../utils/scrollReveal";
 import "../works.css";
@@ -22,11 +22,16 @@ const CARD_REVEAL_STEP = 80;
 const getCachedWorksPage = () => {
   const works = getCachedWorks();
   const about = getCachedAboutContent();
-  return works && about ? { works, about } : null;
+  const categories = getCachedWorkCategoryFilters();
+  return works && about && categories ? { works, about, categories } : null;
 };
 
 const loadWorksPage = () =>
-  Promise.all([loadWorks(), loadAboutContent()]).then(([works, about]) => ({ works, about }));
+  Promise.all([
+    loadWorks(),
+    loadAboutContent(),
+    loadWorkCategoryFilters(),
+  ]).then(([works, about, categories]) => ({ works, about, categories }));
 
 /* 한 줄 안에서 왼쪽 카드부터 차례로 들어오도록 화면에 실제로 놓인 열 순서를 쓴다. */
 function getWorkRevealDelay(element) {
@@ -61,10 +66,16 @@ function WorkGrid({ items, threeColumns = false }) {
 function WorksPage() {
   const content = usePageContent(getCachedWorksPage, loadWorksPage);
   if (!content) return <main className="works-page" />;
-  return <WorksPageContent works={content.works} descriptions={content.about.worldDescriptions} />;
+  return (
+    <WorksPageContent
+      categories={content.categories}
+      descriptions={content.about.worldDescriptions}
+      works={content.works}
+    />
+  );
 }
 
-function WorksPageContent({ descriptions, works }) {
+function WorksPageContent({ categories, descriptions, works }) {
   const pageRef = useRef(null);
   const isMobile = useIsMobile();
   const [language, setLanguage] = useState("ko");
@@ -118,7 +129,7 @@ function WorksPageContent({ descriptions, works }) {
 
       <div className="works-content">
         <WorksFilters
-          categories={workCategories}
+          categories={categories}
           category={category}
           onCategoryChange={(value) => updateFilter("category", value)}
           onWorldChange={(value) => updateFilter("world", value)}

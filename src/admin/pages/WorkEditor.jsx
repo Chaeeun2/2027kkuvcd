@@ -1,6 +1,8 @@
 import { useParams } from "react-router-dom";
 import { normalizeWork, WORKS_COLLECTION } from "../../content/worksContent";
-import { workCategories, workWorlds } from "../../data/works";
+import { PRIMARY_WORK_CATEGORY_IDS } from "../../data/workCategoryLabels";
+import { workWorlds } from "../../data/works";
+import useWorkCategoryLabelMap from "../hooks/useWorkCategoryLabelMap";
 import EditorHeader from "../components/EditorHeader";
 import {
   BilingualField,
@@ -15,9 +17,6 @@ import useDocumentEditor from "../hooks/useDocumentEditor";
 
 const MEDIA_FOLDER = "works";
 
-const categoryOptions = workCategories
-  .slice(1)
-  .map(({ id, label }) => ({ id, label }));
 const worldOptions = workWorlds
   .slice(1)
   .map(({ id, label }) => ({ id, label }));
@@ -44,6 +43,11 @@ function WorkEditor({ workId }) {
   );
   const { draft, error, exists, status, trackUpload, updateField } = editor;
   const { designers, error: designersError } = useDesigners();
+  const { labelMap } = useWorkCategoryLabelMap();
+  const categoryOptions = PRIMARY_WORK_CATEGORY_IDS.map((id) => ({
+    id,
+    label: `${labelMap[id].ko} (${labelMap[id].en})`,
+  }));
   const loadError = status === "error" ? error : designersError;
 
   if (loadError) {

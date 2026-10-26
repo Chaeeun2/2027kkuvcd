@@ -2,17 +2,17 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { resolveImageSrc } from "../../content/defaultAssets";
 import { normalizeWork, WORKS_COLLECTION } from "../../content/worksContent";
-import { workCategories, workWorlds } from "../../data/works";
+import { PRIMARY_WORK_CATEGORY_IDS } from "../../data/workCategoryLabels";
+import { workWorlds } from "../../data/works";
 import PageHeader from "../components/PageHeader";
+import WorkCategoryLabelsModal from "../components/WorkCategoryLabelsEditor";
+import useWorkCategoryLabelMap from "../hooks/useWorkCategoryLabelMap";
 import SortableList from "../components/SortableList";
 import useCollection from "../hooks/useCollection";
 import useDesigners from "../hooks/useDesigners";
 import { deleteDocument, saveOrder } from "../services/documents";
 import { collectMediaKeys, deleteImages } from "../services/media";
 
-const categoryLabels = Object.fromEntries(
-  workCategories.slice(1).map(({ id, label }) => [id, label]),
-);
 const worldLabels = Object.fromEntries(
   workWorlds.map(({ id, label }) => [id, label]),
 );
@@ -23,7 +23,7 @@ const visibilityFilters = [
   { id: "draft", label: "비공개" },
 ];
 
-function WorkRow({ handle, onDelete, work }) {
+function WorkRow({ categoryLabels, handle, onDelete, work }) {
   return (
     <div className="admin-table__row">
       {handle ?? <span />}
@@ -71,6 +71,24 @@ function WorkRow({ handle, onDelete, work }) {
 }
 
 function WorksManager() {
+  const { labelMap, reload: reloadCategoryLabels } = useWorkCategoryLabelMap();
+  const categoryLabels = useMemo(
+    () =>
+      Object.fromEntries(
+        PRIMARY_WORK_CATEGORY_IDS.map((id) => [
+          id,
+          `${labelMap[id].ko} (${labelMap[id].en})`,
+        ]),
+      ),
+    [labelMap],
+  );
+  const categoryFilterOptions = useMemo(
+    () =>
+      Object.fromEntries(
+        PRIMARY_WORK_CATEGORY_IDS.map((id) => [id, labelMap[id].en]),
+      ),
+    [labelMap],
+  );
   const collection = useCollection(WORKS_COLLECTION, normalizeWork);
   const { reload, setItems } = collection;
   const { designers, error: designersError } = useDesigners();
@@ -78,6 +96,7 @@ function WorksManager() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [visibility, setVisibility] = useState("all");
+  const [isCategoryModalOpen, setCategoryModalOpen] = useState(false);
   const error = actionError ?? collection.error ?? designersError;
 
   const works = useMemo(() => {
@@ -156,6 +175,13 @@ function WorksManager() {
         }
         title="WORKS"
       >
+        <button
+          className="admin-button"
+          onClick={() => setCategoryModalOpen(true)}
+          type="button"
+        >
+          작품 분류 관리
+        </button>
         <a
           className="admin-button"
           href="/works"
@@ -172,6 +198,13 @@ function WorksManager() {
         </Link>
       </PageHeader>
       {error ? <p className="admin-error admin-page__error">{error}</p> : null}
+
+      {isCategoryModalOpen ? (
+        <WorkCategoryLabelsModal
+          onClose={() => setCategoryModalOpen(false)}
+          onSaved={reloadCategoryLabels}
+        />
+      ) : null}
 
       <div className="admin-page__body">
         <section className="admin-section">
@@ -191,7 +224,7 @@ function WorksManager() {
               value={category}
             >
               <option value="all">모든 카테고리</option>
-              {Object.entries(categoryLabels).map(([id, label]) => (
+              {Object.entries(categoryFilterOptions).map(([id, label]) => (
                 <option key={id} value={id}>
                   {label}
                 </option>
@@ -242,7 +275,12 @@ function WorksManager() {
               </div>
               {isFiltered ? (
                 visibleWorks.map((work) => (
-                  <WorkRow key={work.id} onDelete={handleDelete} work={work} />
+                  <WorkRow
+                    categoryLabels={categoryLabels}
+                    key={work.id}
+                    onDelete={handleDelete}
+                    work={work}
+                  />
                 ))
               ) : (
                 <SortableList
@@ -251,6 +289,7 @@ function WorksManager() {
                   onChange={handleReorder}
                   renderItem={(work, index, handle) => (
                     <WorkRow
+                      categoryLabels={categoryLabels}
                       handle={handle}
                       onDelete={handleDelete}
                       work={work}

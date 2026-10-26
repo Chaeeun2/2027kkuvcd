@@ -26,7 +26,11 @@ function createCachedLoader(fetchContent, fallback) {
     return pendingRequest;
   };
 
-  return { getCached, load };
+  const invalidate = () => {
+    cachedContent = null;
+  };
+
+  return { getCached, invalidate, load };
 }
 
 export default createCachedLoader;

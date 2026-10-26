@@ -89,7 +89,7 @@ function useDocumentEditor(path, normalize, { validate } = {}) {
     const validationError = validate?.(draft);
     if (validationError) {
       setError(validationError);
-      return;
+      return false;
     }
 
     setStatus("saving");
@@ -110,9 +110,11 @@ function useDocumentEditor(path, normalize, { validate } = {}) {
       setExists(true);
       setStatus("ready");
       if (removed.length > 0) await deleteImages(removed);
+      return true;
     } catch (saveError) {
       setError(saveError.message);
       setStatus("ready");
+      return false;
     }
   }, [draft, path, validate]);
 

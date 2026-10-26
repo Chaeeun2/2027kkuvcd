@@ -7,12 +7,16 @@ import LanguageToggle from "../components/LanguageToggle";
 import WorksFilters from "../components/WorksFilters";
 import usePageContent from "../content/usePageContent";
 import {
+  getCachedWorkCategoryFilters,
+  loadWorkCategoryFilters,
+} from "../content/workCategoriesContent";
+import {
   getCachedWorks,
   getRelatedWorks,
   loadWorks,
 } from "../content/worksContent";
 import useIsMobile from "../hooks/useIsMobile";
-import { workCategories, workWorlds } from "../data/works";
+import { workWorlds } from "../data/works";
 import ContentImage from "../components/ContentImage";
 import { IMAGE_SIZES } from "../utils/optimizedImage";
 import { bindScrollReveal, scheduleVisibleClass } from "../utils/scrollReveal";
@@ -78,13 +82,25 @@ function RelatedWorks({ relatedWorks, work }) {
   );
 }
 
+const getCachedWorkDetailPage = () => {
+  const works = getCachedWorks();
+  const categories = getCachedWorkCategoryFilters();
+  return works && categories ? { works, categories } : null;
+};
+
+const loadWorkDetailPage = () =>
+  Promise.all([loadWorks(), loadWorkCategoryFilters()]).then(([works, categories]) => ({
+    works,
+    categories,
+  }));
+
 function WorkDetailPage() {
-  const works = usePageContent(getCachedWorks, loadWorks);
-  if (!works) return <main className="work-detail-page" />;
-  return <WorkDetailContent works={works} />;
+  const content = usePageContent(getCachedWorkDetailPage, loadWorkDetailPage);
+  if (!content) return <main className="work-detail-page" />;
+  return <WorkDetailContent categories={content.categories} works={content.works} />;
 }
 
-function WorkDetailContent({ works }) {
+function WorkDetailContent({ categories, works }) {
   const pageRef = useRef(null);
   const isMobile = useIsMobile();
   const [language, setLanguage] = useState("ko");
@@ -120,7 +136,7 @@ function WorkDetailContent({ works }) {
 
       <div className="work-detail-content">
         <WorksFilters
-          categories={workCategories}
+          categories={categories}
           category={work.categoryIds}
           onCategoryChange={(value) =>
             goToFilteredWorks("category", value)
